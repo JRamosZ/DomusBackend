@@ -3,34 +3,49 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ["client, user"],
+    enum: ["client", "user"],
+    required: true,
+  },
+  nickname: {
+    type: String,
+    minLength: 2,
+    maxLength: 10,
     required: true,
   },
   name: {
     type: String,
-    minlength: 2,
-    maxlength: 20,
+    minLength: 2,
+    maxLength: 20,
     required: true,
   },
   lastname: {
     type: String,
-    minlength: 2,
-    maxlength: 20,
+    minLength: 2,
+    maxLength: 20,
     required: true,
   },
   mail: {
     type: String,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
     required: true,
   },
+  isMailValidated: {
+    type: Boolean,
+    default: false,
+  },
+  isInfoCompleted: {
+    type: Boolean,
+    default: false,
+  },
   phone: {
-    //Confirm type, is lenght applicable to numbers???
-    type: Number,
-    minlength: 10,
-    maxlength: 10,
+    type: String,
+    minLength: 10,
+    maxLength: 10,
+    match: /^\d+$/, //double check regex
     required: true,
   },
   picture: {
@@ -38,7 +53,17 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   birthday: {
-    type: Date,
+    type: String,
+    // validate: {
+    //   validator: function (v) {
+    //     return (
+    //       v &&
+    //       v.getTime() < Date.now() - 18 * 365 * 24 * 60 * 60 * 1000 &&
+    //       v.getTime() > Date.now() - 100 * 365 * 24 * 60 * 60 * 1000
+    //     );
+    //   },
+    //   message: "La edad debe estar entre 18 y 100 años",
+    // },
   },
   sex: {
     type: String,
@@ -46,31 +71,31 @@ const userSchema = new mongoose.Schema({
   },
   aboutMe: {
     type: String,
-    minlength: 30,
-    maxlength: 200,
+    minLength: 30,
+    maxLength: 200,
     required: true,
   },
   emergencyContact: {
     name: {
       type: String,
-      minlength: 2,
-      maxlength: 20,
+      minLength: 2,
+      maxLength: 20,
       required: true,
     },
     lastname: {
       type: String,
-      minlength: 2,
-      maxlength: 20,
+      minLength: 2,
+      maxLength: 20,
       required: true,
     },
     phone: {
-      //Confirm type, is lenght applicable to numbers???
-      type: Number,
-      minlength: 10,
-      maxlength: 10,
+      type: String,
+      minLength: 10,
+      maxLength: 10,
+      match: /^\d+$/,
       required: true,
     },
-    relationshio: {
+    relationship: {
       type: String,
     },
   },
@@ -78,10 +103,12 @@ const userSchema = new mongoose.Schema({
     type: Number,
     min: 0,
     max: 5,
+    default: 0,
     required: true,
   },
   joined: {
     type: Date,
+    default: new Date(Date.now() - 6 * 60 * 60 * 1000),
     required: true,
   },
 });

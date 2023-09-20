@@ -1,6 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { list, getById, create } = require("../usecases/user.usecase");
+const {
+  list,
+  getById,
+  create,
+  update,
+  deleteById,
+} = require("../usecases/user.usecase");
 
 router.get("/", async (req, res) => {
   try {
@@ -55,4 +61,38 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+router.patch("/:id", auth, async (req, res) => {
+  try {
+    const user = await update(
+      req.params.id,
+      req.body,
+      req.headers.authorization
+    );
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (err) {
+    res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const user = await deleteById(req.params.id, req.headers.authorization);
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (err) {
+    res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+router.module.exports = router;
