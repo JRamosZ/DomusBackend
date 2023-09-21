@@ -6,6 +6,7 @@ const cors = require("cors");
 const routerUser = require("./routes/user.route");
 const routerAuth = require("./routes/auth.route");
 const routerComments = require("./routes/comment.route");
+const routerAccommodation = require("./routes/accommodation.route");
 
 //Middlewares para toda la api
 app.use(cors());
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/users", routerUser);
 app.use("/auth", routerAuth);
 app.use("/comments", routerComments);
+app.use("/accommodation", routerAccommodation);
 
 //Endpoint de home
 app.get("/", (req, res) => {
