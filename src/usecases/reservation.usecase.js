@@ -19,7 +19,6 @@ const create = (data) => {
         })
         initialDate = initialDate.add(1, 'day');
 }
-
     const reservation = Reservation.create(data)
     return reservation;
 };
@@ -34,4 +33,16 @@ const getById = async (id) => {
     return reservation;
 };
 
-module.exports = { create, list, getById };
+const modifyStatus = async (id, data) => {
+    const reservation = await Reservation.findById(id);
+    newStatus = data.status
+    if (newStatus != "refused" && newStatus != "pending" && newStatus !=  "accepted" && newStatus != "paid" && newStatus != "current" && newStatus != "concluded"){
+        const error = new Error("Status no valido");
+        error.status = 400;
+        throw error;
+    }
+    const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: newStatus}, { returnDocument: "after"})
+    return updatedReservation
+}
+
+module.exports = { create, list, getById, modifyStatus };

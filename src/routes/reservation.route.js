@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { create, list, getById } = require("../usecases/reservation.usecase");
+const { create, list, getById, modifyStatus } = require("../usecases/reservation.usecase");
 
 router.post("/", async (req, res) => {
     try {
@@ -44,6 +44,21 @@ router.get("/:id", async (req, res) => {
         } catch (err) {
         res.status(500);
         res.json({
+            success: false,
+            message: err.message,
+        });
+    }
+});
+
+router.patch("/:id/status", async (req, res) => {
+    try {
+        const reservation = await modifyStatus(req.params.id, req.body);
+        res.json({
+            success: true,
+            data: reservation,
+        });
+    } catch (err) {
+        res.status(err.status || 500).json({
             success: false,
             message: err.message,
         });

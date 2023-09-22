@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
+const Schema = require('mongoose').Schema;
 
 const reservationSchema = new mongoose.Schema({
-    pet:{
+    pet:[
+        {
+            // type: Schema.Types.ObjectId,
             type: String,
             required: true
-        },
+        }
+    ],
     client:{
         type: String,
         required: true
@@ -27,8 +31,21 @@ const reservationSchema = new mongoose.Schema({
         required: true
     },
     cost:{
-        type: String,
-        required: true
+        costPerNight: {
+            type: Number
+        },
+        nights: {
+            type: Number
+        },
+        taxes: {
+            type: Number
+        },
+        domusFee: {
+            type: Number
+        },
+        total: {
+            type: Number
+        }
     },
     evidence:[{
             intervalDate: { 
