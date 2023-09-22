@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { auth } = require("../middlewares/auth.middleware");
 const {
   list,
   getById,
@@ -27,11 +28,6 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const user = await getById(req.params.id);
-    if (!user) {
-      const error = new Error("User not found");
-      error.status = 404;
-      throw error;
-    }
     res.json({
       success: true,
       data: user,
@@ -95,4 +91,4 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
-router.module.exports = router;
+module.exports = router;
