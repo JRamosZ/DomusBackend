@@ -7,7 +7,7 @@ const {
   listAccommodation,
   updateAccommodation,
   deleteAccommodation,
-} = require("../usecases/accommodation.model");
+} = require("../usecases/accommodation.usecase");
 
 //list accommodation
 router.get("/", async (req, res) => {

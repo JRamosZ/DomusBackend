@@ -16,15 +16,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     minLength: 2,
     maxLength: 20,
-    required: true,
   },
   lastname: {
     type: String,
     minLength: 2,
     maxLength: 20,
-    required: true,
   },
-  mail: {
+  email: {
     type: String,
     required: true,
     unique: true,
@@ -46,11 +44,10 @@ const userSchema = new mongoose.Schema({
     minLength: 10,
     maxLength: 10,
     match: /^\d+$/, //double check regex
-    required: true,
   },
   picture: {
     type: String,
-    required: true,
+    default: "",
   },
   birthday: {
     type: String,
@@ -73,27 +70,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     minLength: 30,
     maxLength: 200,
-    required: true,
   },
   emergencyContact: {
     name: {
       type: String,
       minLength: 2,
       maxLength: 20,
-      required: true,
     },
     lastname: {
       type: String,
       minLength: 2,
       maxLength: 20,
-      required: true,
     },
     phone: {
       type: String,
       minLength: 10,
       maxLength: 10,
       match: /^\d+$/,
-      required: true,
     },
     relationship: {
       type: String,
@@ -104,13 +97,17 @@ const userSchema = new mongoose.Schema({
     min: 0,
     max: 5,
     default: 0,
-    required: true,
   },
   joined: {
     type: Date,
     default: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    required: true,
   },
+  pets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "pets",
+    },
+  ],
 });
 
 //Exportar modelo
