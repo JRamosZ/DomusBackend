@@ -8,9 +8,13 @@ const list = () => {
   return user;
 };
 
-const getById = (id) => {
-  const user = User.findById(id);
-  return user;
+const getById = async (id) => {
+  const user = await User.findById(id);
+  if (!user) {
+    throw createError(404, "User not found");
+  } else {
+    return user;
+  }
 };
 
 const create = async (data) => {
