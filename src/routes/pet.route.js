@@ -32,11 +32,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/:id", auth, async (req, res) => {
-    try {
-        const newPet = await update(req.params.id, req.body, )
+// router.patch("/:id", auth, async (req, res) => {
+//     try {
+//         const newPet = await update(req.params.id, req.body, )
 
-    }
-});
+//     }
+// });
 
 module.exports = router;
