@@ -17,10 +17,10 @@ app.use(express.json());
 //Middlewares de rutas
 app.use("/users", routerUser);
 app.use("/auth", routerAuth);
-app.use("/pet", routerPet);
+app.use("/pets", routerPet);
 app.use("/comments", routerComments);
 app.use("/accommodation", routerAccommodation);
-app.use("/reservations", routerReservation)
+app.use("/reservarions", routerReservation)
 
 //Endpoint de home
 app.get("/", (req, res) => {
