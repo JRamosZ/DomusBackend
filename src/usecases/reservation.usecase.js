@@ -82,29 +82,25 @@ cron.schedule('* 5-23 * * *', async () => {
 // Intervals evidence status automation (available, defaulted)
 cron.schedule(' * 5,12,18,23 * * *', async () => {
     const reservations = await Reservation.find();
+    const currentDate = dayjs(new Date())
 
     reservations.filter(item => item.status === 'current').map(async reservation => {
-        const currentDate = dayjs(new Date())
         reservation.evidence.forEach( (item, index) => { 
-            if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 05:00:00"), currentDate.format("MMMM D, YYYY 11:59:59")) && item.first.url === ''){
-                reservation["evidence"][index]["first"]["status"] = "available"
-            } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format("MMMM D, YYYY 11:59:59")) && item.first.url === '' ){
-                reservation["evidence"][index]["first"]["status"] = "defaulted"
+            intervalConditionals("05:00:00", "11:59:59", item.first.url, "first")
+            intervalConditionals("12:00:00", "17:59:59", item.second.url, "second")
+            intervalConditionals("18:00:00", "22:59:59", item.third.url, "third")
+
+            function intervalConditionals(time1, time2, url, interval ) {
+                if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`)) && url === ''){
+                    reservation["evidence"][index][interval]["status"] = "available"
+                } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === '' ){
+                    reservation["evidence"][index][interval]["status"] = "defaulted"
+                }
             }
-            if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 12:00:00"), currentDate.format("MMMM D, YYYY 17:59:59")) && item.second.url === ''){
-                reservation["evidence"][index]["second"]["status"] = "available"
-            } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format("MMMM D, YYYY 17:59:59")) && item.second.url === '' ){
-                reservation["evidence"][index]["second"]["status"] = "defaulted"
-            }
-            if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 18:00:00"), currentDate.format("MMMM D, YYYY 22:59:59")) && item.third.url === ''){
-                reservation["evidence"][index]["third"]["status"] = "available"
-            } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format("MMMM D, YYYY 22:59:59")) && item.third.url === '' ){
-                reservation["evidence"][index]["third"]["status"] = "defaulted"
-            }
+
         })
         const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {evidence: reservation.evidence}, { returnDocument: "after"})
         return updatedReservation
-
     })
 });
 
