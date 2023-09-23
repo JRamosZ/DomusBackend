@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { create, list, getById, modifyStatus } = require("../usecases/reservation.usecase");
+const { create, list, getById, modifyStatus, uploadEvidence } = require("../usecases/reservation.usecase");
 
 router.post("/", async (req, res) => {
     try {
@@ -53,6 +53,21 @@ router.get("/:id", async (req, res) => {
 router.patch("/:id/status", async (req, res) => {
     try {
         const reservation = await modifyStatus(req.params.id, req.body);
+        res.json({
+            success: true,
+            data: reservation,
+        });
+    } catch (err) {
+        res.status(err.status || 500).json({
+            success: false,
+            message: err.message,
+        });
+    }
+});
+
+router.patch("/:id/evidence", async (req, res) => {
+    try {
+        const reservation = await uploadEvidence(req.params.id, req.body);
         res.json({
             success: true,
             data: reservation,

@@ -4,6 +4,8 @@ const dayjs = require("dayjs")
 dayjs().format()
 var isSameOrBefore = require('dayjs/plugin/isSameOrBefore')
 dayjs.extend(isSameOrBefore)
+var isBetween = require('dayjs/plugin/isBetween')
+dayjs.extend(isBetween)
 
 // intervals added in data creation
 const create = (data) => {
@@ -45,4 +47,21 @@ const modifyStatus = async (id, data) => {
     return updatedReservation
 }
 
-module.exports = { create, list, getById, modifyStatus };
+const uploadEvidence = async (id, data) => {
+    const reservation = await Reservation.findById(id);
+    const currentDate = dayjs(data.time)
+    reservation.evidence.forEach((interval, index) => {
+        console.log(interval.intervalDate)
+        if(currentDate.format('MMMM D, YYYY') === dayjs(interval.intervalDate).format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 05:00:00"), currentDate.format("MMMM D, YYYY 11:59:59")) && interval.first.url === ''){
+            reservation["evidence"][index]["first"] = data
+        } else if(currentDate.format('MMMM D, YYYY') === dayjs(interval.intervalDate).format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 12:00:00"), currentDate.format("MMMM D, YYYY 17:59:59")) && interval.second.url === ''){
+            reservation["evidence"][index]["second"] = data
+        } else if(currentDate.format('MMMM D, YYYY') === dayjs(interval.intervalDate).format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 18:00:00"), currentDate.format("MMMM D, YYYY 22:59:59")) && interval.third.url === ''){
+            reservation["evidence"][index]["third"] = data
+        }
+    })
+    const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {evidence: reservation.evidence}, { returnDocument: "after"})
+    return updatedReservation
+}
+
+module.exports = { create, list, getById, modifyStatus, uploadEvidence };
