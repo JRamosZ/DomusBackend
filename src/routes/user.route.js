@@ -44,6 +44,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const user = await create(req.body);
+    res.status(201);
     res.json({
       success: true,
       data: user,

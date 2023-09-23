@@ -1,8 +1,15 @@
 const mongoose = require("mongoose");
 
 const petSchema = new mongoose.Schema({
-  owner: {
+  name: {
     type: String,
+    required: true,
+    minLength: 2,
+    maxLength: 10,
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
     required: true,
   },
   picture: {
@@ -42,7 +49,6 @@ const petSchema = new mongoose.Schema({
     min: 0,
     max: 5,
     default: 0,
-    required: true,
   },
 });
 
