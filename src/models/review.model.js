@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Schema = require('mongoose').Schema;
 
 const reviewSchema = new mongoose.Schema({
     sender:{
@@ -22,6 +23,10 @@ const reviewSchema = new mongoose.Schema({
     date:{
         type: Date,
         required: true
+    },
+    edited:{
+        type: Boolean,
+        default: false,
     }
 })
 
