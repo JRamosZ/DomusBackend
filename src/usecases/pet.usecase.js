@@ -8,10 +8,7 @@ const list = () => {
 };
 
 const getById = async (id) => {
-  const pet = await Pet.findById(id).populate("owner");
-  console.log("pet", pet);
-  console.log("nickname", pet.owner.nickname);
-
+  const pet = await Pet.findById(id).populate("owner").exec();
   if (!pet) throw createError(404, "Pet not found");
   return pet;
 };
