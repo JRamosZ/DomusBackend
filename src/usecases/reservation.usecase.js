@@ -1,4 +1,5 @@
 const Reservation = require("../models/reservation.model")
+var cron = require('node-cron');
 
 const dayjs = require("dayjs")
 dayjs().format()
@@ -51,7 +52,6 @@ const uploadEvidence = async (id, data) => {
     const reservation = await Reservation.findById(id);
     const currentDate = dayjs(data.time)
     reservation.evidence.forEach((interval, index) => {
-        console.log(interval.intervalDate)
         if(currentDate.format('MMMM D, YYYY') === dayjs(interval.intervalDate).format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 05:00:00"), currentDate.format("MMMM D, YYYY 11:59:59")) && interval.first.url === ''){
             reservation["evidence"][index]["first"] = data
         } else if(currentDate.format('MMMM D, YYYY') === dayjs(interval.intervalDate).format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 12:00:00"), currentDate.format("MMMM D, YYYY 17:59:59")) && interval.second.url === ''){
@@ -60,8 +60,52 @@ const uploadEvidence = async (id, data) => {
             reservation["evidence"][index]["third"] = data
         }
     })
-    const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {evidence: reservation.evidence}, { returnDocument: "after"})
+    const updatedReservation = await Reservation.findByIdAndUpdate(id, {evidence: reservation.evidence}, { returnDocument: "after"})
     return updatedReservation
 }
+
+// Reservation status automation (current, concluded) 
+cron.schedule('* 5-23 * * *', async () => {
+    const reservations = await Reservation.find();
+    const currentDate = dayjs(new Date())
+    console.log(currentDate.format('MMMM D, YYYY'))
+    reservations.filter(item => item.status === 'paid' && currentDate.isAfter(dayjs(item.start_date))).map(async reservation => {
+        const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "current"}, { returnDocument: "after"})
+        return updatedReservation
+    })
+    reservations.filter(item => item.status === 'current' && currentDate.isAfter(dayjs(item.finish_date))).map(async reservation => {
+        const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "concluded"}, { returnDocument: "after"})
+        return updatedReservation
+    })
+})
+
+// Intervals evidence status automation (available, defaulted)
+cron.schedule(' * 5,12,18,23 * * *', async () => {
+    const reservations = await Reservation.find();
+
+    reservations.filter(item => item.status === 'current').map(async reservation => {
+        const currentDate = dayjs(new Date())
+        reservation.evidence.forEach( (item, index) => { 
+            if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 05:00:00"), currentDate.format("MMMM D, YYYY 11:59:59")) && item.first.url === ''){
+                reservation["evidence"][index]["first"]["status"] = "available"
+            } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format("MMMM D, YYYY 11:59:59")) && item.first.url === '' ){
+                reservation["evidence"][index]["first"]["status"] = "defaulted"
+            }
+            if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 12:00:00"), currentDate.format("MMMM D, YYYY 17:59:59")) && item.second.url === ''){
+                reservation["evidence"][index]["second"]["status"] = "available"
+            } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format("MMMM D, YYYY 17:59:59")) && item.second.url === '' ){
+                reservation["evidence"][index]["second"]["status"] = "defaulted"
+            }
+            if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 18:00:00"), currentDate.format("MMMM D, YYYY 22:59:59")) && item.third.url === ''){
+                reservation["evidence"][index]["third"]["status"] = "available"
+            } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format("MMMM D, YYYY 22:59:59")) && item.third.url === '' ){
+                reservation["evidence"][index]["third"]["status"] = "defaulted"
+            }
+        })
+        const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {evidence: reservation.evidence}, { returnDocument: "after"})
+        return updatedReservation
+
+    })
+});
 
 module.exports = { create, list, getById, modifyStatus, uploadEvidence };
