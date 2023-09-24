@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Schema = require('mongoose').Schema;
 
 const reservationSchema = new mongoose.Schema({
     pet:[
@@ -90,12 +89,14 @@ const reservationSchema = new mongoose.Schema({
         }],
     comments:[
         {
-            type: String
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'comment',
         }
     ],
     reviews:[
         {
-            type: String
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'Reviews',
         }
     ]
 })

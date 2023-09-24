@@ -65,10 +65,9 @@ const uploadEvidence = async (id, data) => {
 }
 
 // Reservation status automation (current, concluded) 
-cron.schedule('* 5-23 * * *', async () => {
+cron.schedule('0 5-23 * * *', async () => {
     const reservations = await Reservation.find();
     const currentDate = dayjs(new Date())
-    console.log(currentDate.format('MMMM D, YYYY'))
     reservations.filter(item => item.status === 'paid' && currentDate.isAfter(dayjs(item.start_date))).map(async reservation => {
         const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "current"}, { returnDocument: "after"})
         return updatedReservation
@@ -80,7 +79,7 @@ cron.schedule('* 5-23 * * *', async () => {
 })
 
 // Intervals evidence status automation (available, defaulted)
-cron.schedule(' * 5,12,18,23 * * *', async () => {
+cron.schedule('0 5,12,18,23 * * *', async () => {
     const reservations = await Reservation.find();
     const currentDate = dayjs(new Date())
 
