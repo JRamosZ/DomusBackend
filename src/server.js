@@ -8,6 +8,7 @@ const routerAuth = require("./routes/auth.route");
 const routerPet = require("./routes/pet.route");
 const routerComments = require("./routes/comment.route");
 const routerAccommodation = require("./routes/accommodation.route");
+const routerReview = require("./routes/review.route");
 const routerReservation = require("./routes/reservation.route")
 
 //Middlewares para toda la api
@@ -20,7 +21,8 @@ app.use("/auth", routerAuth);
 app.use("/pets", routerPet);
 app.use("/comments", routerComments);
 app.use("/accommodation", routerAccommodation);
-app.use("/reservarions", routerReservation)
+app.use("/reviews", routerReview)
+app.use("/reservations", routerReservation)
 
 //Endpoint de home
 app.get("/", (req, res) => {
