@@ -1,20 +1,10 @@
 const jwt = require("../lib/jwt.lib");
-/**
- * Middleware de auth que vamos a utilizar en las rutas privadas
- *
- * headers : {
- * Content-Type: application/json,
- * Authorization: `Bearer ${token}`
- * }
- */
+const createError = require("http-errors");
 
 const auth = (req, res, next) => {
   try {
-    // Obtener mi header de autorizacion
     const authorization = req.headers.authorization || "";
-    // Quitarle el Bearer a mi header
     const token = authorization.replace("Bearer ", "");
-    // Verificar el token
     const isVerified = jwt.verify(token);
     next();
   } catch (err) {
@@ -25,4 +15,23 @@ const auth = (req, res, next) => {
   }
 };
 
-module.exports = { auth };
+const userChange = (req, res, next) => {
+  try {
+    const authorization = req.headers.authorization || "";
+    const token = authorization.replace("Bearer ", "");
+    const isVerified = jwt.verify(token);
+    if (isVerified.id !== req.params.id)
+      throw createError(
+        401,
+        "You are not allowed to make changes on this user"
+      );
+    next();
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+module.exports = { auth, userChange };
