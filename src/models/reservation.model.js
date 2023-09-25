@@ -3,18 +3,20 @@ const mongoose = require("mongoose");
 const reservationSchema = new mongoose.Schema({
     pet:[
         {
-            // type: Schema.Types.ObjectId,
-            type: String,
-            required: true
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "pets",
+            required: true,
         }
     ],
     client:{
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+        required: true,
     },
     host:{
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+        required: true,
     },
     status:{
         type: String,

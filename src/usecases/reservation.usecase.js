@@ -31,13 +31,29 @@ const list = async () => {
     return reservation;
 };
 
+// return reservation with all referenced data
 const getById = async (id) => {
-    const reservation = await Reservation.findById(id);
+    const reservation = await Reservation.findById(id)
+        .populate("pet")
+        .populate("client", "-password")
+        .populate("host", "-password")
+        .populate("comments")
+        .populate("reviews");
+    if (!reservation) {
+        const error = new Error("Reservation not found");
+        error.status = 404;
+        throw error;
+    }
     return reservation;
 };
 
 const modifyStatus = async (id, data) => {
     const reservation = await Reservation.findById(id);
+    if (!reservation) {
+        const error = new Error("Reservation not found");
+        error.status = 404;
+        throw error;
+    }
     newStatus = data.status
     if (newStatus != "refused" && newStatus != "pending" && newStatus !=  "accepted" && newStatus != "paid" && newStatus != "current" && newStatus != "concluded"){
         const error = new Error("Status no valido");
@@ -50,6 +66,11 @@ const modifyStatus = async (id, data) => {
 
 const uploadEvidence = async (id, data) => {
     const reservation = await Reservation.findById(id);
+    if (!reservation) {
+        const error = new Error("Reservation not found");
+        error.status = 404;
+        throw error;
+    }
     const currentDate = dayjs(data.time)
     reservation.evidence.forEach((interval, index) => {
         if(currentDate.format('MMMM D, YYYY') === dayjs(interval.intervalDate).format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format("MMMM D, YYYY 05:00:00"), currentDate.format("MMMM D, YYYY 11:59:59")) && interval.first.url === ''){
@@ -68,14 +89,16 @@ const uploadEvidence = async (id, data) => {
 cron.schedule('0 5-23 * * *', async () => {
     const reservations = await Reservation.find();
     const currentDate = dayjs(new Date())
-    reservations.filter(item => item.status === 'paid' && currentDate.isAfter(dayjs(item.start_date))).map(async reservation => {
-        const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "current"}, { returnDocument: "after"})
-        return updatedReservation
-    })
-    reservations.filter(item => item.status === 'current' && currentDate.isAfter(dayjs(item.finish_date))).map(async reservation => {
-        const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "concluded"}, { returnDocument: "after"})
-        return updatedReservation
-    })
+    reservations.filter(item => item.status === 'paid' && currentDate.isAfter(dayjs(item.start_date)))
+        .map(async reservation => {
+            const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "current"}, { returnDocument: "after"})
+            return updatedReservation
+        })
+    reservations.filter(item => item.status === 'current' && currentDate.isAfter(dayjs(item.finish_date)))
+        .map(async reservation => {
+            const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "concluded"}, { returnDocument: "after"})
+            return updatedReservation
+        })
 })
 
 // Intervals evidence status automation (available, defaulted)
@@ -83,24 +106,25 @@ cron.schedule('0 5,12,18,23 * * *', async () => {
     const reservations = await Reservation.find();
     const currentDate = dayjs(new Date())
 
-    reservations.filter(item => item.status === 'current').map(async reservation => {
-        reservation.evidence.forEach( (item, index) => { 
-            intervalConditionals("05:00:00", "11:59:59", item.first.url, "first")
-            intervalConditionals("12:00:00", "17:59:59", item.second.url, "second")
-            intervalConditionals("18:00:00", "22:59:59", item.third.url, "third")
+    reservations.filter(item => item.status === 'current')
+        .map(async reservation => {
+            reservation.evidence.forEach( (item, index) => { 
+                intervalConditionals("05:00:00", "11:59:59", item.first.url, "first")
+                intervalConditionals("12:00:00", "17:59:59", item.second.url, "second")
+                intervalConditionals("18:00:00", "22:59:59", item.third.url, "third")
 
-            function intervalConditionals(time1, time2, url, interval ) {
-                if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`)) && url === ''){
-                    reservation["evidence"][index][interval]["status"] = "available"
-                } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === '' ){
-                    reservation["evidence"][index][interval]["status"] = "defaulted"
+                function intervalConditionals(time1, time2, url, interval ) {
+                    if(dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`)) && url === ''){
+                        reservation["evidence"][index][interval]["status"] = "available"
+                    } else if (dayjs(item.intervalDate).format('MMMM D, YYYY') === currentDate.format('MMMM D, YYYY') && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === '' ){
+                        reservation["evidence"][index][interval]["status"] = "defaulted"
+                    }
                 }
-            }
 
+            })
+            const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {evidence: reservation.evidence}, { returnDocument: "after"})
+            return updatedReservation
         })
-        const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {evidence: reservation.evidence}, { returnDocument: "after"})
-        return updatedReservation
-    })
 });
 
 module.exports = { create, list, getById, modifyStatus, uploadEvidence };
