@@ -1,16 +1,32 @@
 const express = require("express");
 const router = express.Router();
-const { create, getById, update } = require("../usecases/review.usecase");
+const { create, topList, getById, update } = require("../usecases/review.usecase");
 
 router.post("/", async (req, res) => {
     try {
-        const reservation = await create(req.body);
+        const review = await create(req.body);
         res.json({
             success: true,
-            data: reservation,
+            data: review,
         });
     } catch (err) {
         res.status(500);
+        res.json({
+            success: false,
+            message: err.message,
+        });
+    }
+});
+
+router.get("/top", async (req, res) => {
+    try {
+        const topReviews = await topList();
+        res.json({
+            success: true,
+            data: topReviews,
+        });
+        } catch (err) {
+        res.status(400);
         res.json({
             success: false,
             message: err.message,

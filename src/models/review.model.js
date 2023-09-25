@@ -1,13 +1,18 @@
 const mongoose = require("mongoose");
-const Schema = require('mongoose').Schema;
 
 const reviewSchema = new mongoose.Schema({
+    reservationId:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+    },
     sender:{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
         required: true,
     },
     receiver:{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
         required: true,
     },
     comment:{
