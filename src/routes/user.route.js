@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { auth } = require("../middlewares/auth.middleware");
+const { auth, userChange } = require("../middlewares/auth.middleware");
 const {
   list,
   getById,
@@ -11,7 +11,7 @@ const {
 
 router.get("/", async (req, res) => {
   try {
-    const users = await list();
+    const users = await list(req.query);
     res.json({
       success: true,
       data: users,
@@ -58,7 +58,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/:id", auth, async (req, res) => {
+router.patch("/:id", userChange, async (req, res) => {
   try {
     const user = await update(
       req.params.id,
@@ -77,7 +77,7 @@ router.patch("/:id", auth, async (req, res) => {
   }
 });
 
-router.delete("/:id", auth, async (req, res) => {
+router.delete("/:id", userChange, async (req, res) => {
   try {
     const user = await deleteById(req.params.id, req.headers.authorization);
     res.json({

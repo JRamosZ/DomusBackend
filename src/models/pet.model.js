@@ -48,7 +48,22 @@ const petSchema = new mongoose.Schema({
     type: Number,
     min: 0,
     max: 5,
-    default: 0,
+    default: 5,
+  },
+  ratesList: {
+    type: [Number],
+    validate: {
+      validator: function (v) {
+        for (num of v) {
+          if (num <= 5 && num >= 0) {
+            continue;
+          } else {
+            return false;
+          }
+        }
+      },
+      message: "Rate most be between 0 and 5",
+    },
   },
 });
 

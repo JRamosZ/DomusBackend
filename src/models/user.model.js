@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ["client", "user"],
+    enum: ["client", "host"],
     required: true,
   },
   nickname: {
@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    match: /^.+@.*\..*$/,
     required: true,
     unique: true,
   },
@@ -43,24 +44,24 @@ const userSchema = new mongoose.Schema({
     type: String,
     minLength: 10,
     maxLength: 10,
-    match: /^\d+$/, //double check regex
+    match: /^\d+$/,
   },
   picture: {
     type: String,
     default: "",
   },
   birthday: {
-    type: String,
-    // validate: {
-    //   validator: function (v) {
-    //     return (
-    //       v &&
-    //       v.getTime() < Date.now() - 18 * 365 * 24 * 60 * 60 * 1000 &&
-    //       v.getTime() > Date.now() - 100 * 365 * 24 * 60 * 60 * 1000
-    //     );
-    //   },
-    //   message: "La edad debe estar entre 18 y 100 años",
-    // },
+    type: Date,
+    validate: {
+      validator: function (v) {
+        return (
+          v &&
+          v.getTime() < Date.now() - 18 * 365 * 24 * 60 * 60 * 1000 &&
+          v.getTime() > Date.now() - 100 * 365 * 24 * 60 * 60 * 1000
+        );
+      },
+      message: "La edad debe estar entre 18 y 100 años",
+    },
   },
   sex: {
     type: String,
@@ -110,5 +111,4 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-//Exportar modelo
 module.exports = mongoose.model("users", userSchema, "Users");
