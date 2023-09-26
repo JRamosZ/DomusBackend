@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { create, list, getById, modifyStatus, uploadEvidence } = require("../usecases/reservation.usecase");
+const { auth } = require("../middlewares/auth.middleware");
 
 router.post("/", async (req, res) => {
     try {
@@ -50,9 +51,11 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", auth, async (req, res) => {
     try {
-        const reservation = await modifyStatus(req.params.id, req.body);
+        const reservation = await modifyStatus(
+            req.params.id, 
+            req.body);
         res.json({
             success: true,
             data: reservation,
@@ -65,12 +68,15 @@ router.patch("/:id/status", async (req, res) => {
     }
 });
 
-router.patch("/:id/evidence", async (req, res) => {
+router.patch("/:id/evidence", auth, async (req, res) => {
     try {
-        const reservation = await uploadEvidence(req.params.id, req.body);
+        const reservation = await uploadEvidence(
+            req.params.id, 
+            req.body);
         res.json({
             success: true,
             data: reservation,
+            
         });
     } catch (err) {
         res.status(err.status || 500).json({
