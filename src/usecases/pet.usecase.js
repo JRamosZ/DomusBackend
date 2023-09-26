@@ -14,8 +14,12 @@ const getById = async (id) => {
   return pet;
 };
 
-const create = (data) => {
-  const pet = Pet.create(data);
+const create = async (data) => {
+  const pet = await Pet.create(data);
+  const user = await User.findById(pet.owner);
+  let petsList = user.pets;
+  petsList.push(pet._id);
+  await User.findByIdAndUpdate(pet.owner, { pets: petsList });
   return pet;
 };
 
