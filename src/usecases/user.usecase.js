@@ -3,9 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("../lib/jwt.lib");
 const createError = require("http-errors");
 
-const list = () => {
-  const user = User.find();
-  return user;
+const list = (filter) => {
+  const userList = User.find(filter);
+  return userList;
 };
 
 const getById = async (id) => {
@@ -36,12 +36,7 @@ const login = async (email, password) => {
   return token;
 };
 
-const update = async (id, data, authorization) => {
-  const user = await User.findById(id);
-  const token = authorization.replace("Bearer ", "");
-  const isVerified = jwt.verify(token);
-  if (isVerified.id != user._id)
-    throw createError(403, "You are not allowed to edit this user");
+const update = async (id, data) => {
   const updatedUser = await User.findByIdAndUpdate(id, data, {
     returnDocument: "after",
   });
@@ -49,13 +44,7 @@ const update = async (id, data, authorization) => {
   return updatedUser;
 };
 
-const deleteById = async (id, authorization) => {
-  const user = await User.findById(id);
-  if (!user) throw createError(404, "User not found");
-  const token = authorization.replace("Bearer ", "");
-  const isVerified = jwt.verify(token);
-  if (isVerified.id != user._id)
-    throw createError(403, "You are not allowed to delete this user");
+const deleteById = async (id) => {
   const deletedUser = await User.findByIdAndDelete(id);
   if (!deletedUser) throw createError(404, "User not deleted");
   return deletedUser;

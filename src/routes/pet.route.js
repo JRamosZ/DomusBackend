@@ -11,7 +11,7 @@ const { auth } = require("../middlewares/auth.middleware");
 
 router.get("/", async (req, res) => {
   try {
-    const petList = await list();
+    const petList = await list(req.query);
     res.json({
       success: true,
       data: petList,
