@@ -103,10 +103,26 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: new Date(Date.now() - 6 * 60 * 60 * 1000),
   },
+  accommodation: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "accommodation",
+  },
   pets: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "pets",
+    },
+  ],
+  reservations: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reservations",
+    },
+  ],
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reviews",
     },
   ],
 });

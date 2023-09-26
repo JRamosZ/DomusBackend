@@ -1,62 +1,64 @@
 const mongoose = require("mongoose");
 
 const accommodationSchema = new mongoose.Schema({
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: true,
+  },
   picture: {
-    type: String,
+    type: [String],
     required: true,
   },
   hosting: {
-    //amount
-    pet: {
-      type: Boolean,
-      required: true,
+    amount: {
+      type: Number,
     },
-
     dog: {
       small: {
-        is_hosted: Boolean,
+        isHosted: Boolean,
         price: Number,
       },
       medium: {
-        is_hosted: Boolean,
+        isHosted: Boolean,
         price: Number,
       },
       big: {
-        is_hosted: Boolean,
+        isHosted: Boolean,
         price: Number,
       },
     },
     cat: {
-      is_hosted: Boolean,
+      isHosted: Boolean,
       price: Number,
     },
   },
-  has_pet: {
+  hasPet: {
     type: Boolean,
   },
   description: {
     type: String,
-    minlength: 100,
+    minlength: 10,
     maxlength: 200,
     required: true,
   },
-  check_in: {
+  checkIn: {
     type: String,
     required: true,
   },
-  check_out: {
+  checkOut: {
     type: String,
     required: true,
   },
   amenities: {
     type: String,
-    minlength: 100,
+    minlength: 10,
     maxlength: 200,
     required: true,
   },
   restrictions: {
     type: String,
-    minlength: 100,
+    minlength: 10,
     maxlength: 200,
     required: true,
   },
@@ -65,15 +67,15 @@ const accommodationSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    external_number: {
+    externalNumber: {
       type: Number,
       required: true,
     },
-    internal_number: {
+    internalNumber: {
       type: Number,
       required: true,
     },
-    cologne: {
+    neighbourhood: {
       type: String,
       required: true,
     },
@@ -85,11 +87,11 @@ const accommodationSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    postal_code: {
+    postalCode: {
       type: Number,
       required: true,
     },
-    streets_nearby: {
+    streetsNearby: {
       type: String,
       required: true,
     },
@@ -98,7 +100,7 @@ const accommodationSchema = new mongoose.Schema({
       required: true,
     },
   },
-  bank_account: {
+  bankAccount: {
     name: {
       type: String,
       required: true,
@@ -114,6 +116,27 @@ const accommodationSchema = new mongoose.Schema({
     clabe: {
       type: String,
       required: true,
+    },
+  },
+  rate: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 5,
+  },
+  ratesList: {
+    type: [Number],
+    validate: {
+      validator: function (v) {
+        for (num of v) {
+          if (num <= 5 && num >= 0) {
+            continue;
+          } else {
+            return false;
+          }
+        }
+      },
+      message: "Rate most be between 0 and 5",
     },
   },
 });
