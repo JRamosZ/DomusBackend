@@ -23,6 +23,7 @@ const create = (data) => {
         initialDate = initialDate.add(1, 'day');
 }
     const reservation = Reservation.create(data)
+    // Mail implementation to "Host user.email"
     return reservation;
 };
 
@@ -47,28 +48,56 @@ const getById = async (id) => {
     return reservation;
 };
 
-const modifyStatus = async (id, data) => {
+const modifyStatus = async (id, data, request) => {
     const reservation = await Reservation.findById(id);
     if (!reservation) {
         const error = new Error("Reservation not found");
         error.status = 404;
         throw error;
     }
+    const authorization = request.headers.authorization || "";
+    const token = authorization.replace("Bearer ", "");
+    const isVerified = jwt.verify(token);
+    if (isVerified.id != reservation.host && reservation.client) {
+        const error = new Error("you are not allowed to update the status");
+        error.status = 403;
+        throw error;
+    }
     newStatus = data.status
-    if (newStatus != "refused" && newStatus != "pending" && newStatus !=  "accepted" && newStatus != "paid" && newStatus != "current" && newStatus != "concluded"){
+    if (newStatus != "refused" && newStatus != "pending" && newStatus != "accepted" && newStatus != "paid" && newStatus != "current" && newStatus != "concluded"){
         const error = new Error("Status no valido");
         error.status = 400;
         throw error;
     }
     const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: newStatus}, { returnDocument: "after"})
+    if (!rupdatedReservation) {
+        const error = new Error("Reservation not edited");
+        error.status = 404;
+        throw error;
+    }
+    if(newStatus === "refused"){
+        // Mail implementation to "Client user.email"
+        console.log("refused")
+    } else if(newStatus === "accepted"){
+        // Mail implementation to "Client user.email"
+        console.log("accepted")
+    } 
     return updatedReservation
 }
 
-const uploadEvidence = async (id, data) => {
+const uploadEvidence = async (id, data, request) => {
     const reservation = await Reservation.findById(id);
     if (!reservation) {
         const error = new Error("Reservation not found");
         error.status = 404;
+        throw error;
+    }
+    const authorization = request.headers.authorization || "";
+    const token = authorization.replace("Bearer ", "");
+    const isVerified = jwt.verify(token);
+    if (isVerified.id != reservation.host) {
+        const error = new Error("you are not allowed to upload evidence");
+        error.status = 403;
         throw error;
     }
     const currentDate = dayjs(data.time)
@@ -82,6 +111,11 @@ const uploadEvidence = async (id, data) => {
         }
     })
     const updatedReservation = await Reservation.findByIdAndUpdate(id, {evidence: reservation.evidence}, { returnDocument: "after"})
+    if (!rupdatedReservation) {
+        const error = new Error("Reservation not edited");
+        error.status = 404;
+        throw error;
+    }
     return updatedReservation
 }
 
