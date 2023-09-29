@@ -9,6 +9,8 @@ const {
   deleteAccommodation,
 } = require("../usecases/accommodation.usecase");
 
+const userCases = require("../usecases/user.usecase");
+
 //list accommodation
 router.get("/", async (req, res) => {
   try {
@@ -52,6 +54,9 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const accommodation = await createAccommodation(req.body);
+    const updatedUser = await userCases.update(accommodation.owner, {
+      accommodation: accommodation._id,
+    });
     res.status(201);
     res.json({
       success: true,
@@ -69,7 +74,11 @@ router.post("/", async (req, res) => {
 //update accommodation
 router.patch("/:id", async (req, res) => {
   try {
-    const upAccommodation = await updateAccommodation(req.params.id, req.body);
+    const upAccommodation = await updateAccommodation(
+      req.params.id,
+      req.body,
+      req.headers.authorization
+    );
 
     res.json({
       success: true,

@@ -9,12 +9,15 @@ const routerPet = require("./routes/pet.route");
 const routerComments = require("./routes/comment.route");
 const routerAccommodation = require("./routes/accommodation.route");
 const routerReview = require("./routes/review.route");
-const routerReservation = require("./routes/reservation.route")
-const routerPayment = require("./routes/payment.route")
+const routerReservation = require("./routes/reservation.route");
+const routerPayment = require("./routes/payment.route");
 
 //Middlewares para toda la api
 app.use(cors());
 app.use(express.json());
+
+//file static for EMAIL
+app.use(express.static(__dirname + "public"));
 
 //Middlewares de rutas
 app.use("/users", routerUser);

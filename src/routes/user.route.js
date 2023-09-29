@@ -1,3 +1,4 @@
+const emailer = require("../usecases/email.usecase");
 const express = require("express");
 const router = express.Router();
 const { auth, userChange } = require("../middlewares/auth.middleware");
@@ -44,6 +45,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const user = await create(req.body);
+    emailer.sendMail(user);
     res.status(201);
     res.json({
       success: true,

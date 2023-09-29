@@ -1,21 +1,22 @@
 const mongoose = require("mongoose");
-const Schema = require('mongoose').Schema;
 
 const reservationSchema = new mongoose.Schema({
     pet:[
         {
-            // type: Schema.Types.ObjectId,
-            type: String,
-            required: true
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "pets",
+            required: true,
         }
     ],
     client:{
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+        required: true,
     },
     host:{
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+        required: true,
     },
     status:{
         type: String,
@@ -93,12 +94,14 @@ const reservationSchema = new mongoose.Schema({
         }],
     comments:[
         {
-            type: String
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'comment',
         }
     ],
     reviews:[
         {
-            type: String
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'Reviews',
         }
     ]
 })
