@@ -31,6 +31,9 @@ const reservationSchema = new mongoose.Schema({
         required: true
     },
     cost:{
+        paymentId:{
+            type: String
+        },
         costPerNight: {
             type: Number
         },

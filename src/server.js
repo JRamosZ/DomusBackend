@@ -24,7 +24,7 @@ app.use("/comments", routerComments);
 app.use("/accommodation", routerAccommodation);
 app.use("/reviews", routerReview)
 app.use("/reservations", routerReservation)
-app.use("/create-payment-intent", routerPayment)
+app.use("/payment", routerPayment)
 
 //Endpoint de home
 app.get("/", (req, res) => {
