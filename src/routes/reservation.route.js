@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { create, list, getById, modifyStatus, uploadEvidence } = require("../usecases/reservation.usecase");
+const { create, list, getAllById, modifyStatus, uploadEvidence } = require("../usecases/reservation.usecase");
 const { auth } = require("../middlewares/auth.middleware");
 
 router.post("/", async (req, res) => {
@@ -35,9 +35,9 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/all/:id", async (req, res) => {
     try {
-        const reservation = await getById(req.params.id);
+        const reservation = await getAllById(req.params.id);
         res.json({
             success: true,
             data: reservation,
