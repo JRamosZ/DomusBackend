@@ -29,6 +29,7 @@ app.use("/accommodation", routerAccommodation);
 app.use("/reviews", routerReview);
 app.use("/reservations", routerReservation);
 app.use("/create-payment-intent", routerPayment);
+app.use("/payment", routerPayment);
 app.use("/bucket", routerBucket);
 
 //Endpoint de home
