@@ -8,6 +8,7 @@ const {
   create,
   update,
   deleteById,
+  confirm,
 } = require("../usecases/user.usecase");
 
 router.get("/", async (req, res) => {
@@ -45,7 +46,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const user = await create(req.body);
-    emailer.sendMail(user);
+    // emailer.sendMail(user);
     res.status(201);
     res.json({
       success: true,
@@ -59,6 +60,8 @@ router.post("/", async (req, res) => {
     });
   }
 });
+
+router.get("/confirm/:token", [], confirm);
 
 router.patch("/:id", userChange, async (req, res) => {
   try {

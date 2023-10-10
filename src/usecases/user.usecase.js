@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("../lib/jwt.lib");
 const createError = require("http-errors");
+const { sendEmail } = require("./email.usecase");
 
 const list = (filter) => {
   const userList = User.find(filter);
@@ -16,10 +17,59 @@ const getById = async (id) => {
 
 const create = async (data) => {
   const saltRounds = 10;
+  const { email } = data;
+  let user = (await User.findOne({ email })) || null;
+  if (user != null) {
+    console.log("EL USUARIO YA EXISTE");
+  }
   data.password = await bcrypt.hash(data.password, saltRounds);
   data.picture = `https://ui-avatars.com/api/?name=${data.nickname}`;
-  const user = await User.create(data);
+  user = new User(data);
+  //generar token
+  const token = jwt.sign({ email: user.email });
+  //Enviamos el email
+  await sendEmail(data, token);
+  // await user.save()
+  user = User.create(data);
   return user;
+};
+
+const confirm = async (req, res) => {
+  //optener el token
+  const { token } = req.params;
+  // verificar la data
+  const data = await jwt.getTokenData(token);
+
+  if (data === null) {
+    return res.json({
+      success: false,
+      msg: "Error al obtener data",
+    });
+  }
+
+  const { email } = data;
+
+  //Verificar existencia del usuario
+  const user = (await User.findOne({ email })) || null;
+
+  if (user === null) {
+    return res.json({
+      success: false,
+      msg: "usuario no existe",
+    });
+  }
+
+  // Verificar el codigo
+  if (email !== user.email) {
+    return res.redirect("../public/error.html");
+  }
+
+  //Actualizar usuario
+  user.isMailValidated = true;
+  await user.save();
+
+  // Redireccionar al a cofirmacion
+  return res.redirect("/signin.html");
 };
 
 const login = async (email, password) => {
@@ -50,4 +100,4 @@ const deleteById = async (id) => {
   return deletedUser;
 };
 
-module.exports = { list, getById, create, update, deleteById, login };
+module.exports = { list, getById, create, update, deleteById, login, confirm };
