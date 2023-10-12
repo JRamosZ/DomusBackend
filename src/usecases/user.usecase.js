@@ -10,7 +10,7 @@ const list = (filter) => {
 };
 
 const getById = async (id) => {
-  const user = await User.findById(id);
+  const user = await User.findById(id).populate("pets").exec();
   if (!user) throw createError(404, "User not found");
   return user;
 };
