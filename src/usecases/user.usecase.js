@@ -10,7 +10,7 @@ const list = (filter) => {
 };
 
 const getById = async (id) => {
-  const user = await User.findById(id);
+  const user = await User.findById(id).populate("pets").exec();
   if (!user) throw createError(404, "User not found");
   return user;
 };
@@ -74,9 +74,16 @@ const confirm = async (req, res) => {
 
 const login = async (email, password) => {
   const user = await User.findOne({ email });
-  if (!user) throw createError(400, "Invalid data");
+  if (!user) throw createError(400, "Usuario o Contraseña incorrectos");
   const passwordIsValid = await bcrypt.compare(password, user.password);
-  if (!passwordIsValid) throw createError(400, "Invalid data");
+  if (!passwordIsValid)
+    throw createError(400, "Usuario o Contraseña incorrectos");
+  if (!user.isMailValidated)
+    throw createError(
+      400,
+      "Tu correo aún no ha sido validado, revisa tu bandeja de entrada"
+    );
+
   const token = jwt.sign({
     id: user._id,
     userType: user.type,
