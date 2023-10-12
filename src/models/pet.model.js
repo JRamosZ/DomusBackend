@@ -18,7 +18,7 @@ const petSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["perro", "gato"],
+    enum: ["Perro", "Gato"],
     required: true,
   },
   breed: {
@@ -27,16 +27,19 @@ const petSchema = new mongoose.Schema({
   },
   size: {
     type: String,
+    enum: ["Pequeño", "Mediano", "Grande"],
     required: true,
   },
   sex: {
     type: String,
-    enum: ["macho", "hembra"],
+    enum: ["Macho", "Hembra"],
     required: true,
   },
   age: {
     type: Number,
     required: true,
+    min: 1,
+    max: 20,
   },
   aboutMe: {
     type: String,
