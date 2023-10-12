@@ -69,7 +69,7 @@ const confirm = async (req, res) => {
   await user.save();
 
   // Redireccionar al a cofirmacion
-  return res.redirect("/signin.html");
+  return res.redirect("http://localhost:3000/accounts/signin");
 };
 
 const login = async (email, password) => {
