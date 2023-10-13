@@ -10,7 +10,9 @@ const list = (filter) => {
 };
 
 const getById = async (id) => {
-  const user = await User.findById(id).populate("pets").exec();
+  const user = await User.findById(id)
+    .populate(["pets", "accommodation"])
+    .exec();
   if (!user) throw createError(404, "User not found");
   return user;
 };
@@ -54,6 +56,7 @@ const confirm = async (req, res) => {
 
   if (user === null) {
     return res.json({
+      notFound: true,
       success: false,
       msg: "usuario no existe",
     });

@@ -13,28 +13,30 @@ const accommodationSchema = new mongoose.Schema({
   hosting: {
     amount: {
       type: Number,
+      required: true,
     },
     dog: {
       small: {
-        isHosted: Boolean,
+        isHosted: { type: Boolean, default: false },
         price: Number,
       },
       medium: {
-        isHosted: Boolean,
+        isHosted: { type: Boolean, default: false },
         price: Number,
       },
       big: {
-        isHosted: Boolean,
+        isHosted: { type: Boolean, default: false },
         price: Number,
       },
     },
     cat: {
-      isHosted: Boolean,
+      isHosted: { type: Boolean, default: false },
       price: Number,
     },
   },
   hasPet: {
     type: Boolean,
+    required: true,
   },
   description: {
     type: String,
@@ -51,15 +53,11 @@ const accommodationSchema = new mongoose.Schema({
     required: true,
   },
   amenities: {
-    type: String,
-    minlength: 10,
-    maxlength: 200,
+    type: [String],
     required: true,
   },
   restrictions: {
-    type: String,
-    minlength: 10,
-    maxlength: 200,
+    type: [String],
     required: true,
   },
   address: {

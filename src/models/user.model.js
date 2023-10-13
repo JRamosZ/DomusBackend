@@ -69,8 +69,8 @@ const userSchema = new mongoose.Schema({
   },
   aboutMe: {
     type: String,
-    minLength: 30,
-    maxLength: 200,
+    minLength: 150,
+    maxLength: 350,
   },
   emergencyContact: {
     name: {

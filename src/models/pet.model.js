@@ -44,7 +44,7 @@ const petSchema = new mongoose.Schema({
   aboutMe: {
     type: String,
     minLength: 30,
-    maxLength: 200,
+    maxLength: 150,
     required: true,
   },
   rate: {
