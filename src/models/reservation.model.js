@@ -23,11 +23,11 @@ const reservationSchema = new mongoose.Schema({
         enum: ["refused", "pending", "accepted", "paid", "current", "concluded"],
         required: true
     },
-    start_date:{
+    startDate:{
         type: Date,
         required: true
     },
-    finish_date:{
+    finishDate:{
         type: Date,
         required: true
     },
