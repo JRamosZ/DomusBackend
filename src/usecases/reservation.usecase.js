@@ -19,8 +19,8 @@ const create = async (data) => {
         throw error;
     }
     data["evidence"] = []
-    let initialDate = dayjs(data["start_date"])
-    let finalDate = dayjs(data["finish_date"])
+    let initialDate = dayjs(data["startDate"])
+    let finalDate = dayjs(data["finishDate"])
     while (initialDate.isSameOrBefore(finalDate)){
         data["evidence"].push({
             intervalDate: initialDate, 
@@ -42,14 +42,49 @@ const list = async () => {
     return reservation;
 };
 
-// return reservation with all referenced data
-const getAllById = async (id) => {
+const getById = async (id) => {
     const reservation = await Reservation.findById(id)
+    if (!reservation) {
+        const error = new Error("Reservation not found");
+        error.status = 404;
+        throw error;
+    }
+    return reservation;
+}
+
+// return reservation with all referenced data
+const getAllById = async (id, query) => {
+    let reservation
+    if ( query.find === 'info'){
+        reservation = await Reservation.findById(id)
         .populate("pet")
         .populate("client", "-password")
-        .populate("host", "-password")
+        .populate({
+            path: 'host',
+            select:'-password',
+            populate: {
+                path: 'accommodation', 
+                select: "-bankAccount"
+            }
+        })
+    } else if ( query.find === 'pet' || query.find === 'evidence'){
+        reservation = await Reservation.findById(id)
+        .populate("pet")
+        .populate("client", "-password")
+    } else if ( query.find === 'comunication'){
+        reservation = await Reservation.findById(id)
+        .populate("host", "-password, -bankAccount")
+        .populate("client", "-password")
         .populate("comments")
-        .populate("reviews");
+    } else if ( query.find === 'reviews'){
+        reservation = await Reservation.findById(id)
+        .populate("host", "-password, -bankAccount")
+        .populate("client", "-password")
+        .populate("pet")
+        .populate("reviews")
+    } else {
+        reservation = await Reservation.findById(id)
+    } 
     if (!reservation) {
         const error = new Error("Reservation not found");
         error.status = 404;
@@ -133,12 +168,12 @@ const uploadEvidence = async (id, data, request) => {
 cron.schedule('0 5-23 * * *', async () => {
     const reservations = await Reservation.find({ $or: [ { status: "paid" }, {status: "current" } ] });
     const currentDate = dayjs(new Date())
-    reservations.filter(item => item.status === 'paid' && currentDate.isAfter(dayjs(item.start_date)))
+    reservations.filter(item => item.status === 'paid' && currentDate.isAfter(dayjs(item.startDate)))
         .map(async reservation => {
             const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "current"}, { returnDocument: "after"})
             return updatedReservation
         })
-    reservations.filter(item => item.status === 'current' && currentDate.isAfter(dayjs(item.finish_date)))
+    reservations.filter(item => item.status === 'current' && currentDate.isAfter(dayjs(item.finishDate)))
         .map(async reservation => {
             const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, {status: "concluded"}, { returnDocument: "after"})
             return updatedReservation
@@ -170,4 +205,4 @@ cron.schedule('0 5,12,18,23 * * *', async () => {
     })
 });
 
-module.exports = { create, list, getAllById, modifyStatus, uploadEvidence };
+module.exports = { create, list, getById, getAllById, modifyStatus, uploadEvidence };
