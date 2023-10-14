@@ -26,39 +26,15 @@ const create = async (data) => {
 const update = async (id, data, authorization) => {
   const pet = await Pet.findById(id);
   if (!pet) throw createError(404, "Pet not found");
-
-  // Validating when data comes from profile (does not include data.rate)
-  if (data.rate === undefined) {
-    const token = authorization.replace("Bearer ", "");
-    const isVerified = jwt.verify(token);
-    if (isVerified.id != pet.owner)
-      throw createError(403, "You are not allowed to edit this pet");
-  } else {
-    // Handling data when it comes from review (includes data.rate)
-    let newArray = pet.ratesList;
-    newArray.push(data.rate);
-    let sum = newArray.reduce((previous, current) => (current += previous));
-    let avg = sum / newArray.length;
-    data = {
-      ratesList: newArray,
-      rate: avg,
-    };
-  }
-
-  // Updating Pet with data from profile or review
+  const token = authorization.replace("Bearer ", "");
+  const isVerified = jwt.verify(token);
+  if (isVerified.id != pet.owner)
+    throw createError(403, "You are not allowed to edit this pet");
   const updatedPet = await Pet.findByIdAndUpdate(id, data, {
     returnDocument: "after",
     runValidators: true,
   });
   if (!updatedPet) throw createError(404, "Pet not edited");
-
-  // Updating User rate with new Pet rate
-  const petList = await list({ owner: pet.owner });
-  let sum = 0;
-  petList.forEach((pet) => (sum += pet.rate));
-  const avg = sum / petList.length;
-  const updatedUser = await User.findByIdAndUpdate(pet.owner, { rate: avg });
-  if (!updatedUser) throw createError(404, "User not updated");
 
   return updatedPet;
 };

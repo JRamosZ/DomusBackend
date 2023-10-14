@@ -69,8 +69,8 @@ const userSchema = new mongoose.Schema({
   },
   aboutMe: {
     type: String,
-    minLength: 30,
-    maxLength: 200,
+    minLength: 150,
+    maxLength: 350,
   },
   emergencyContact: {
     name: {
@@ -119,12 +119,11 @@ const userSchema = new mongoose.Schema({
       ref: "Reservations",
     },
   ],
-  reviews: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Reviews",
-    },
-  ],
+  reviews: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Reviews",
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("users", userSchema, "Users");
