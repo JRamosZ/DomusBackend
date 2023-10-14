@@ -14,7 +14,7 @@ const userCases = require("../usecases/user.usecase");
 //list accommodation
 router.get("/", async (req, res) => {
   try {
-    const accommodation = await listAccommodation();
+    const accommodation = await listAccommodation(req.query);
     res.json({
       success: true,
       data: accommodation,

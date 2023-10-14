@@ -4,10 +4,38 @@ const jwt = require("../lib/jwt.lib");
 
 const createError = require("http-errors");
 
-const listAccommodation = () => {
-  const accommodation = Accommodation.find();
+const listAccommodation = async (query) => {
+  let accommodation;
+
+  if (query.pettype === 'Gato'){
+    accommodation = await Accommodation.find({ 
+      "address.state": query.state, 
+      "address.city": query.city,
+      "hosting.cat.isHosted": true
+    }).populate("owner");
+  } else if (query.pettype === 'Perro' && query.petsize === 'Pequeño'){
+    accommodation = await Accommodation.find({ 
+      "address.state": query.state, 
+      "address.city": query.city,
+      "hosting.dog.small.isHosted": true
+    }).populate("owner");
+  } else if (query.pettype === 'Perro' && query.petsize === 'Mediano'){
+    accommodation = await Accommodation.find({ 
+      "address.state": query.state, 
+      "address.city": query.city,
+      "hosting.dog.medium.isHosted": true
+    }).populate("owner");
+  } else if (query.pettype === 'Perro' && query.petsize === 'Grande'){
+    accommodation = await Accommodation.find({ 
+      "address.state": query.state, 
+      "address.city": query.city,
+      "hosting.dog.big.isHosted": true
+    }).populate("owner");
+  }
+
   return accommodation;
 };
+
 const getById = (id) => {
   const accommodation = Accommodation.findById(id);
   return accommodation;
