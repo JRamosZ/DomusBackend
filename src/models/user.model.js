@@ -119,12 +119,11 @@ const userSchema = new mongoose.Schema({
       ref: "Reservations",
     },
   ],
-  reviews: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Reviews",
-    },
-  ],
+  reviews: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Reviews",
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("users", userSchema, "Users");

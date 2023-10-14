@@ -124,6 +124,7 @@ const accommodationSchema = new mongoose.Schema({
   },
   ratesList: {
     type: [Number],
+    default: [5],
     validate: {
       validator: function (v) {
         for (num of v) {
@@ -136,6 +137,7 @@ const accommodationSchema = new mongoose.Schema({
       },
       message: "Rate most be between 0 and 5",
     },
+    default: [],
   },
 });
 

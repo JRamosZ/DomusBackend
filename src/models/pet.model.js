@@ -55,6 +55,7 @@ const petSchema = new mongoose.Schema({
   },
   ratesList: {
     type: [Number],
+    default: [5],
     validate: {
       validator: function (v) {
         for (num of v) {
