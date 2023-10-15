@@ -108,12 +108,15 @@ const login = async (email, password) => {
   return token;
 };
 
-const update = async (id, data) => {
-  const updatedUser = await User.findByIdAndUpdate(id, data, {
-    returnDocument: "after",
-  });
-  if (!updatedUser) throw createError(404, "User not updated");
-  return updatedUser;
+const update = async (id, jsonData, filesData) => {
+  console.log("id -->", id);
+  console.log("json -->", jsonData);
+  console.log("filesData -->", filesData);
+  // const updatedUser = await User.findByIdAndUpdate(id, data, {
+  //   returnDocument: "after",
+  // });
+  // if (!updatedUser) throw createError(404, "User not updated");
+  return jsonData;
 };
 
 const deleteById = async (id) => {

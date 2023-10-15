@@ -11,6 +11,11 @@ const {
   confirm,
 } = require("../usecases/user.usecase");
 
+// Middleware
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 router.get("/", async (req, res) => {
   try {
     const users = await list(req.query);
@@ -63,13 +68,9 @@ router.post("/", async (req, res) => {
 
 router.get("/confirm/:token", [], confirm);
 
-router.patch("/:id", userChange, async (req, res) => {
+router.patch("/:id", userChange, upload.any(), async (req, res) => {
   try {
-    const user = await update(
-      req.params.id,
-      req.body,
-      req.headers.authorization
-    );
+    const user = await update(req.params.id, req.body, req.files);
     res.json({
       success: true,
       data: user,
