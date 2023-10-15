@@ -2,6 +2,8 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("../lib/jwt.lib");
 const createError = require("http-errors");
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const { s3Client } = require("../lib/s3Client");
 const { sendEmail } = require("./email.usecase");
 
 const list = (filter) => {
@@ -108,15 +110,30 @@ const login = async (email, password) => {
   return token;
 };
 
-const update = async (id, jsonData, filesData) => {
-  console.log("id -->", id);
-  console.log("json -->", jsonData);
-  console.log("filesData -->", filesData);
-  // const updatedUser = await User.findByIdAndUpdate(id, data, {
-  //   returnDocument: "after",
-  // });
-  // if (!updatedUser) throw createError(404, "User not updated");
-  return jsonData;
+const update = async (id, data, folderName, fileData) => {
+  const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+  data.birthday = new Date(data.birthday);
+
+  // Uploading picture
+  const fileName = `${folderName}/${id}/${new Date().getTime()}-${
+    fileData.originalname
+  }`.replaceAll(" ", "");
+  const params = {
+    Bucket: AWS_BUCKET_NAME,
+    Key: fileName,
+    Body: fileData.buffer,
+  };
+  const result = await s3Client.send(new PutObjectCommand(params));
+  if (!result) throw createError(404, "File not uploaded");
+  const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+  data.picture = url;
+
+  // Updating info into DB
+  const updatedUser = await User.findByIdAndUpdate(id, data, {
+    returnDocument: "after",
+  });
+  if (!updatedUser) throw createError(404, "User not updated");
+  return updatedUser;
 };
 
 const deleteById = async (id) => {

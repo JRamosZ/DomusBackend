@@ -70,7 +70,13 @@ router.get("/confirm/:token", [], confirm);
 
 router.patch("/:id", userChange, upload.any(), async (req, res) => {
   try {
-    const user = await update(req.params.id, req.body, req.files);
+    const data = JSON.parse(req.body.data);
+    const user = await update(
+      req.params.id,
+      data,
+      req.body.folder,
+      req.files[0]
+    );
     res.json({
       success: true,
       data: user,
