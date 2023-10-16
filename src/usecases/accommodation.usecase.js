@@ -7,29 +7,29 @@ const createError = require("http-errors");
 const listAccommodation = async (query) => {
   let accommodation;
 
-  if (query.pettype === 'Gato'){
-    accommodation = await Accommodation.find({ 
-      "address.state": query.state, 
+  if (query.pettype === "Gato") {
+    accommodation = await Accommodation.find({
+      "address.state": query.state,
       "address.city": query.city,
-      "hosting.cat.isHosted": true
+      "hosting.cat.isHosted": true,
     }).populate("owner");
-  } else if (query.pettype === 'Perro' && query.petsize === 'Pequeño'){
-    accommodation = await Accommodation.find({ 
-      "address.state": query.state, 
+  } else if (query.pettype === "Perro" && query.petsize === "Pequeño") {
+    accommodation = await Accommodation.find({
+      "address.state": query.state,
       "address.city": query.city,
-      "hosting.dog.small.isHosted": true
+      "hosting.dog.small.isHosted": true,
     }).populate("owner");
-  } else if (query.pettype === 'Perro' && query.petsize === 'Mediano'){
-    accommodation = await Accommodation.find({ 
-      "address.state": query.state, 
+  } else if (query.pettype === "Perro" && query.petsize === "Mediano") {
+    accommodation = await Accommodation.find({
+      "address.state": query.state,
       "address.city": query.city,
-      "hosting.dog.medium.isHosted": true
+      "hosting.dog.medium.isHosted": true,
     }).populate("owner");
-  } else if (query.pettype === 'Perro' && query.petsize === 'Grande'){
-    accommodation = await Accommodation.find({ 
-      "address.state": query.state, 
+  } else if (query.pettype === "Perro" && query.petsize === "Grande") {
+    accommodation = await Accommodation.find({
+      "address.state": query.state,
       "address.city": query.city,
-      "hosting.dog.big.isHosted": true
+      "hosting.dog.big.isHosted": true,
     }).populate("owner");
   }
 
@@ -49,34 +49,15 @@ const createAccommodation = (data) => {
 const updateAccommodation = async (id, data, authorization) => {
   const accommodation = await Accommodation.findById(id);
   if (!accommodation) throw createError(404, "Accommodation not found");
-  // Validating when data comes from profile (does not include data.rate)
-  if (data.rate === undefined) {
-    const token = authorization.replace("Bearer ", "");
-    const isVerified = jwt.verify(token);
-    if (isVerified.id != accommodation.owner)
-      throw createError(403, "You are not allowed to edit this accommodation");
-  } else {
-    // Handling data when it comes from review (includes data.rate)
-    let ratesArray = accommodation.ratesList;
-    ratesArray.push(data.rate);
-    let sum = ratesArray.reduce((previous, current) => (current += previous));
-    let avg = sum / ratesArray.length;
-    data = {
-      ratesList: ratesArray,
-      rate: avg,
-    };
-  }
-  // Updating Accommodation with data from profile or review
+  const token = authorization.replace("Bearer ", "");
+  const isVerified = jwt.verify(token);
+  if (isVerified.id != accommodation.owner)
+    throw createError(403, "You are not allowed to edit this accommodation");
   const updatedAccommodation = await Accommodation.findByIdAndUpdate(id, data, {
     returnDocument: "after",
     runValidators: true,
   });
   if (!updatedAccommodation) throw createError(404, "Accommodation not edited");
-  // Updating User rate with new Accommodation rate
-  const updatedUser = await User.findByIdAndUpdate(accommodation.owner, {
-    rate: data.rate,
-  });
-  if (!updatedUser) throw createError(404, "User not updated");
 
   return updatedAccommodation;
 };
