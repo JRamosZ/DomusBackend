@@ -7,7 +7,12 @@ const {
   update,
   deleteById,
 } = require("../usecases/pet.usecase");
-const { auth } = require("../middlewares/auth.middleware");
+const { auth, userChange } = require("../middlewares/auth.middleware");
+
+// Middleware
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.get("/", async (req, res) => {
   try {
@@ -40,9 +45,10 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", auth, async (req, res) => {
+router.post("/:id", userChange, upload.any(), async (req, res) => {
+  const data = JSON.parse(req.body.data);
   try {
-    const pet = await create(req.body);
+    const pet = await create(data, req.files[0]);
     res.status(201);
     res.json({
       success: true,
