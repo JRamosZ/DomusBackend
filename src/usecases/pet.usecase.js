@@ -2,6 +2,8 @@ const Pet = require("../models/pet.model");
 const User = require("../models/user.model");
 const createError = require("http-errors");
 const jwt = require("../lib/jwt.lib");
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const { s3Client } = require("../lib/s3Client");
 
 const list = (filter) => {
   const petList = Pet.find(filter);
@@ -14,13 +16,36 @@ const getById = async (id) => {
   return pet;
 };
 
-const create = async (data) => {
-  const pet = await Pet.create(data);
+const create = async (petData, petPicture) => {
+  const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+  // Creating pet and saving ID to owner
+  const pet = await Pet.create(petData);
   const user = await User.findById(pet.owner);
   let petsList = user.pets;
   petsList.push(pet._id);
   await User.findByIdAndUpdate(pet.owner, { pets: petsList });
-  return pet;
+
+  // Uploading picture
+  const fileName = `pets/${pet._id}/${new Date().getTime()}-${
+    petPicture.originalname
+  }`.replaceAll(" ", "");
+  const params = {
+    Bucket: AWS_BUCKET_NAME,
+    Key: fileName,
+    Body: petPicture.buffer,
+  };
+  const result = await s3Client.send(new PutObjectCommand(params));
+  if (!result) throw createError(404, "File not uploaded");
+  const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+
+  // Adding URL to pet.picture
+  const updatedPet = Pet.findByIdAndUpdate(
+    pet._id,
+    { picture: url },
+    { returnDocument: "after" }
+  );
+  return updatedPet;
 };
 
 const update = async (id, data, authorization) => {

@@ -5,7 +5,7 @@ const petSchema = new mongoose.Schema({
     type: String,
     required: true,
     minLength: 2,
-    maxLength: 10,
+    maxLength: 20,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -14,7 +14,6 @@ const petSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
-    required: true,
   },
   type: {
     type: String,
@@ -43,7 +42,7 @@ const petSchema = new mongoose.Schema({
   },
   aboutMe: {
     type: String,
-    minLength: 30,
+    minLength: 100,
     maxLength: 150,
     required: true,
   },

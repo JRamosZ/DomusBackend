@@ -63,4 +63,21 @@ const update = async (id, data) => {
   return updatedReview;
 };
 
-module.exports = { create, getById, update };
+const list = () => {
+  const reviews = Review.find()
+    .sort({ $natural: -1 })
+    .limit(6)
+    .populate([
+      {
+        path: "sender",
+        select: ["name", "lastname", "picture"],
+      },
+      {
+        path: "receiver",
+        select: ["name", "lastname"],
+      },
+    ]);
+  return reviews;
+};
+
+module.exports = { create, getById, update, list };
