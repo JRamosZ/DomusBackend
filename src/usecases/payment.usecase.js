@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Reservation = require("../models/reservation.model")
+const User = require("../models/user.model")
 
 const paymentProcess = async (data) => {
 
@@ -10,6 +11,7 @@ const paymentProcess = async (data) => {
         description: data.description,
         metadata: {
             reservationId: data.reservationId,
+            clientId: data.clientId
         },
     });
 
@@ -25,6 +27,9 @@ const paymentStatus = async (event) => {
             const updatedReservation = await Reservation.findByIdAndUpdate(
                 event.data.object.metadata.reservationId, { status: 'paid' }, {returnDocument: "after"}
             )
+            const client = await User.findById(event.data.object.metadata.clientId)
+            const host = await User.findById(event.data.object.metadata.hostId)
+            // Implementación email client.email y host.email
             break;
         case 'payment_method.attached':
             const paymentMethod = event.data.object;
