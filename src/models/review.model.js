@@ -16,6 +16,10 @@ const reviewSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
+  reservation: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
   comment: {
     type: String,
     maxLength: 500,

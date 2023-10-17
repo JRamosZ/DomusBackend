@@ -4,9 +4,18 @@ const Review = require("../models/review.model");
 const User = require("../models/user.model");
 const Pet = require("../models/pet.model");
 const Accommodation = require("../models/accommodation.model");
+const Reservation = require("../models/reservation.model");
 
 const create = async (data) => {
   const review = await Review.create(data);
+
+  // Assigning new review to reservation
+  const reservation = await Reservation.findById(data.reservation);
+  if (!reservation) throw createError(404, "Reservation not found");
+  reservation.reviews.push(review._id);
+  await Reservation.findByIdAndUpdate(data.reservation, {
+    reviews: reservation.reviews,
+  });
 
   //   Assigning new rate item to pet/accommodation ratesList and updating pet/accommodation rate
   const service =

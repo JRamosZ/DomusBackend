@@ -91,7 +91,10 @@ const getAllById = async (id, query) => {
       .populate("host", "-password, -bankAccount")
       .populate("client", "-password")
       .populate("pet")
-      .populate("reviews");
+      .populate({
+        path: "reviews",
+        populate: { path: "sender", select: ["name", "lastname", "picture"] },
+      });
   } else {
     reservation = await Reservation.findById(id);
   }
