@@ -26,9 +26,9 @@ router.post("/upload", upload.any(), async (req, res) => {
 });
 
 // Download a unique file
-router.get("/download", async (req, res) => {
+router.get("/download/:id(*)", async (req, res) => {
   try {
-    const urlAccess = await getPicture(req.body.id);
+    const urlAccess = await getPicture(req.params.id);
     res.json({
       success: true,
       data: urlAccess,

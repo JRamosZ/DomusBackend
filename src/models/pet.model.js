@@ -5,7 +5,7 @@ const petSchema = new mongoose.Schema({
     type: String,
     required: true,
     minLength: 2,
-    maxLength: 10,
+    maxLength: 20,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -14,11 +14,10 @@ const petSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
-    required: true,
   },
   type: {
     type: String,
-    enum: ["perro", "gato"],
+    enum: ["Perro", "Gato"],
     required: true,
   },
   breed: {
@@ -27,21 +26,24 @@ const petSchema = new mongoose.Schema({
   },
   size: {
     type: String,
+    enum: ["Pequeño", "Mediano", "Grande"],
     required: true,
   },
   sex: {
     type: String,
-    enum: ["macho", "hembra"],
+    enum: ["Macho", "Hembra"],
     required: true,
   },
   age: {
     type: Number,
     required: true,
+    min: 1,
+    max: 20,
   },
   aboutMe: {
     type: String,
-    minLength: 30,
-    maxLength: 200,
+    minLength: 100,
+    maxLength: 150,
     required: true,
   },
   rate: {
@@ -52,6 +54,7 @@ const petSchema = new mongoose.Schema({
   },
   ratesList: {
     type: [Number],
+    default: [5],
     validate: {
       validator: function (v) {
         for (num of v) {

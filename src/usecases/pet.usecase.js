@@ -2,6 +2,8 @@ const Pet = require("../models/pet.model");
 const User = require("../models/user.model");
 const createError = require("http-errors");
 const jwt = require("../lib/jwt.lib");
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const { s3Client } = require("../lib/s3Client");
 
 const list = (filter) => {
   const petList = Pet.find(filter);
@@ -14,51 +16,50 @@ const getById = async (id) => {
   return pet;
 };
 
-const create = async (data) => {
-  const pet = await Pet.create(data);
+const create = async (petData, petPicture) => {
+  const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+  // Creating pet and saving ID to owner
+  const pet = await Pet.create(petData);
   const user = await User.findById(pet.owner);
   let petsList = user.pets;
   petsList.push(pet._id);
   await User.findByIdAndUpdate(pet.owner, { pets: petsList });
-  return pet;
+
+  // Uploading picture
+  const fileName = `pets/${pet._id}/${new Date().getTime()}-${
+    petPicture.originalname
+  }`.replaceAll(" ", "");
+  const params = {
+    Bucket: AWS_BUCKET_NAME,
+    Key: fileName,
+    Body: petPicture.buffer,
+  };
+  const result = await s3Client.send(new PutObjectCommand(params));
+  if (!result) throw createError(404, "File not uploaded");
+  const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+
+  // Adding URL to pet.picture
+  const updatedPet = Pet.findByIdAndUpdate(
+    pet._id,
+    { picture: url },
+    { returnDocument: "after" }
+  );
+  return updatedPet;
 };
 
 const update = async (id, data, authorization) => {
   const pet = await Pet.findById(id);
   if (!pet) throw createError(404, "Pet not found");
-
-  // Validating when data comes from profile (does not include data.rate)
-  if (data.rate === undefined) {
-    const token = authorization.replace("Bearer ", "");
-    const isVerified = jwt.verify(token);
-    if (isVerified.id != pet.owner)
-      throw createError(403, "You are not allowed to edit this pet");
-  } else {
-    // Handling data when it comes from review (includes data.rate)
-    let newArray = pet.ratesList;
-    newArray.push(data.rate);
-    let sum = newArray.reduce((previous, current) => (current += previous));
-    let avg = sum / newArray.length;
-    data = {
-      ratesList: newArray,
-      rate: avg,
-    };
-  }
-
-  // Updating Pet with data from profile or review
+  const token = authorization.replace("Bearer ", "");
+  const isVerified = jwt.verify(token);
+  if (isVerified.id != pet.owner)
+    throw createError(403, "You are not allowed to edit this pet");
   const updatedPet = await Pet.findByIdAndUpdate(id, data, {
     returnDocument: "after",
     runValidators: true,
   });
   if (!updatedPet) throw createError(404, "Pet not edited");
-
-  // Updating User rate with new Pet rate
-  const petList = await list({ owner: pet.owner });
-  let sum = 0;
-  petList.forEach((pet) => (sum += pet.rate));
-  const avg = sum / petList.length;
-  const updatedUser = await User.findByIdAndUpdate(pet.owner, { rate: avg });
-  if (!updatedUser) throw createError(404, "User not updated");
 
   return updatedPet;
 };

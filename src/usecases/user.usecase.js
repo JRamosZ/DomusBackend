@@ -2,6 +2,8 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("../lib/jwt.lib");
 const createError = require("http-errors");
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const { s3Client } = require("../lib/s3Client");
 const { sendEmail } = require("./email.usecase");
 
 const list = (filter) => {
@@ -10,7 +12,43 @@ const list = (filter) => {
 };
 
 const getById = async (id) => {
-  const user = await User.findById(id);
+  const user = await User.findById(id)
+    // .populate(["pets", "accommodation", "reviews"])
+    .populate([
+      "pets",
+      "accommodation",
+      {
+        path: "reviews",
+        populate: { path: "sender", select: ["name", "lastname", "picture"] },
+      },
+      {
+        path: "reviews",
+        populate: { path: "receiver", select: ["name", "lastname", "picture"] },
+      },
+      {
+        path: "reservations",
+        select: [
+          "_id",
+          "host",
+          "client",
+          "startDate",
+          "finishDate",
+          "status",
+          "cost",
+        ],
+        populate: [
+          {
+            path: "host",
+            select: ["name", "lastname", "client", "_id", "picture"],
+          },
+          {
+            path: "client",
+            select: ["name", "lastname", "client", "_id", "picture"],
+          },
+        ],
+      },
+    ])
+    .exec();
   if (!user) throw createError(404, "User not found");
   return user;
 };
@@ -24,11 +62,11 @@ const create = async (data) => {
   }
   data.password = await bcrypt.hash(data.password, saltRounds);
   data.picture = `https://ui-avatars.com/api/?name=${data.nickname}`;
-  user = new User(data);
+  // user = new User(data);
   //generar token
-  const token = jwt.sign({ email: user.email });
+  // const token = jwt.sign({ email: user.email });
   //Enviamos el email
-  await sendEmail(data, token);
+  // await sendEmail(data, token);
   // await user.save()
   user = User.create(data);
   return user;
@@ -54,6 +92,7 @@ const confirm = async (req, res) => {
 
   if (user === null) {
     return res.json({
+      notFound: true,
       success: false,
       msg: "usuario no existe",
     });
@@ -74,9 +113,16 @@ const confirm = async (req, res) => {
 
 const login = async (email, password) => {
   const user = await User.findOne({ email });
-  if (!user) throw createError(400, "Invalid data");
+  if (!user) throw createError(400, "Usuario o Contraseña incorrectos");
   const passwordIsValid = await bcrypt.compare(password, user.password);
-  if (!passwordIsValid) throw createError(400, "Invalid data");
+  if (!passwordIsValid)
+    throw createError(400, "Usuario o Contraseña incorrectos");
+  if (!user.isMailValidated)
+    throw createError(
+      400,
+      "Tu correo aún no ha sido validado, revisa tu bandeja de entrada"
+    );
+
   const token = jwt.sign({
     id: user._id,
     userType: user.type,
@@ -86,7 +132,25 @@ const login = async (email, password) => {
   return token;
 };
 
-const update = async (id, data) => {
+const update = async (id, data, folderName, fileData) => {
+  const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+  data.birthday = new Date(data.birthday);
+
+  // Uploading picture
+  const fileName = `${folderName}/${id}/${new Date().getTime()}-${
+    fileData.originalname
+  }`.replaceAll(" ", "");
+  const params = {
+    Bucket: AWS_BUCKET_NAME,
+    Key: fileName,
+    Body: fileData.buffer,
+  };
+  const result = await s3Client.send(new PutObjectCommand(params));
+  if (!result) throw createError(404, "File not uploaded");
+  const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+  data.picture = url;
+
+  // Updating info into DB
   const updatedUser = await User.findByIdAndUpdate(id, data, {
     returnDocument: "after",
   });
