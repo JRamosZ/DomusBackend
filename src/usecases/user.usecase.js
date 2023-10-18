@@ -25,6 +25,28 @@ const getById = async (id) => {
         path: "reviews",
         populate: { path: "receiver", select: ["name", "lastname", "picture"] },
       },
+      {
+        path: "reservations",
+        select: [
+          "_id",
+          "host",
+          "client",
+          "startDate",
+          "finishDate",
+          "status",
+          "cost",
+        ],
+        populate: [
+          {
+            path: "host",
+            select: ["name", "lastname", "client", "_id", "picture"],
+          },
+          {
+            path: "client",
+            select: ["name", "lastname", "client", "_id", "picture"],
+          },
+        ],
+      },
     ])
     .exec();
   if (!user) throw createError(404, "User not found");
