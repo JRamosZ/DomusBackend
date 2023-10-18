@@ -76,7 +76,7 @@ router.get("/all/:id", async (req, res) => {
 
 router.patch("/:id/status", auth, async (req, res) => {
   try {
-    const reservation = await modifyStatus(req.params.id, req.body);
+    const reservation = await modifyStatus(req.params.id, req.body, req);
     res.json({
       success: true,
       data: reservation,

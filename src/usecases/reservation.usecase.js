@@ -1,6 +1,7 @@
 const Reservation = require("../models/reservation.model");
 const User = require("../models/user.model");
 var cron = require("node-cron");
+const jwt = require("../lib/jwt.lib");
 
 const dayjs = require("dayjs");
 dayjs().format();
@@ -51,9 +52,9 @@ const list = async () => {
 };
 
 const getById = async (id) => {
-  const reservation = await Reservation.findById(id)
-    .populate(["client", "host", "reviews"])
-    .exec();
+  const reservation = await Reservation.findById(id);
+  // .populate(["client", "host", "reviews"])
+  // .exec();
   if (!reservation) {
     const error = new Error("Reservation not found");
     error.status = 404;
@@ -139,7 +140,7 @@ const modifyStatus = async (id, data, request) => {
     { status: newStatus },
     { returnDocument: "after" }
   );
-  if (!rupdatedReservation) {
+  if (!updatedReservation) {
     const error = new Error("Reservation not edited");
     error.status = 404;
     throw error;
