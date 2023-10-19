@@ -1,5 +1,11 @@
 const express = require("express");
-const { create, getById, update, list } = require("../usecases/review.usecase");
+const {
+  create,
+  getById,
+  update,
+  list,
+  listForIndex,
+} = require("../usecases/review.usecase");
 const { auth } = require("../middlewares/auth.middleware");
 
 const router = express.Router();
@@ -10,6 +16,25 @@ router.post("/", auth, async (req, res) => {
     res.json({
       success: true,
       data: review,
+    });
+  } catch (err) {
+    res.status(err.status || 500);
+    res.json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+router.get("/forIndexPage", async (req, res) => {
+  try {
+    const reviewList = await listForIndex(
+      parseInt(req.query.qty),
+      parseInt(req.query.minRate)
+    );
+    res.json({
+      success: true,
+      data: reviewList,
     });
   } catch (err) {
     res.status(err.status || 500);

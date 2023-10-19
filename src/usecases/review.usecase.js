@@ -89,4 +89,21 @@ const list = () => {
   return reviews;
 };
 
-module.exports = { create, getById, update, list };
+const listForIndex = (qty, minRate) => {
+  const reviews = Review.find({ rate: { $gte: minRate } })
+    .sort({ $natural: -1 })
+    .limit(qty)
+    .populate([
+      {
+        path: "sender",
+        select: ["name", "lastname", "picture"],
+      },
+      {
+        path: "receiver",
+        select: ["name", "lastname"],
+      },
+    ]);
+  return reviews;
+};
+
+module.exports = { create, getById, update, list, listForIndex };
