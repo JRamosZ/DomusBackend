@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const {
   createAccommodation,
+  createAccommodationId,
   getById,
   listAccommodation,
   updateAccommodation,
@@ -10,6 +11,11 @@ const {
 } = require("../usecases/accommodation.usecase");
 
 const userCases = require("../usecases/user.usecase");
+
+// Middleware
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 //list accommodation
 router.get("/", async (req, res) => {
@@ -61,6 +67,33 @@ router.post("/", async (req, res) => {
     res.json({
       success: true,
       data: accommodation,
+    });
+  } catch (error) {
+    res.status(error.status || 500);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+//create accommodation with Id
+router.post("/:id", upload.any(), async (req, res) => {
+  console.log("entró");
+  // console.log("data", req.body);
+  console.log("body", req.body);
+  console.log("files", req.files);
+  // const data = JSON.parse(req.body.data);
+  try {
+    // const accommodation = await createAccommodationId(data, req.files);
+    // const updatedUser = await userCases.update(accommodation.owner, {
+    //   accommodation: accommodation._id,
+    // });
+
+    res.status(201);
+    res.json({
+      success: true,
+      // data: accommodation,
     });
   } catch (error) {
     res.status(error.status || 500);

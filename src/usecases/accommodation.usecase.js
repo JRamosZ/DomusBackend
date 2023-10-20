@@ -46,6 +46,11 @@ const createAccommodation = (data) => {
   return accommodation;
 };
 
+const createAccommodationId = (data) => {
+  const accommodation = Accommodation.create(data);
+  return accommodation;
+};
+
 const updateAccommodation = async (id, data, authorization) => {
   const accommodation = await Accommodation.findById(id);
   if (!accommodation) throw createError(404, "Accommodation not found");
@@ -69,6 +74,7 @@ const deleteAccommodation = (id) => {
 
 module.exports = {
   createAccommodation,
+  createAccommodationId,
   getById,
   listAccommodation,
   updateAccommodation,

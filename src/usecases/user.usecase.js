@@ -62,13 +62,13 @@ const create = async (data) => {
   }
   data.password = await bcrypt.hash(data.password, saltRounds);
   data.picture = `https://ui-avatars.com/api/?name=${data.nickname}`;
-  user = new User(data);
+  // user = new User(data);
   //generar token
-  const token = jwt.sign({ email: user.email });
+  // const token = jwt.sign({ email: user.email });
   //Obtenemos el templete
   //const templete = getTemplete(user, token);
   //Enviamos el email
-  await sendEmail(data, token);
+  // await sendEmail(data, token);
   // await user.save()
   user = User.create(data);
   return user;
