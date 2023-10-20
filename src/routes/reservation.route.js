@@ -91,7 +91,7 @@ router.patch("/:id/status", auth, async (req, res) => {
 
 router.patch("/:id/evidence", auth, async (req, res) => {
   try {
-    const reservation = await uploadEvidence(req.params.id, req.body);
+    const reservation = await uploadEvidence(req.params.id, req.body, req);
     res.json({
       success: true,
       data: reservation,

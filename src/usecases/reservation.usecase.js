@@ -209,7 +209,7 @@ const uploadEvidence = async (id, data, request) => {
     { evidence: reservation.evidence },
     { returnDocument: "after" }
   );
-  if (!rupdatedReservation) {
+  if (!updatedReservation) {
     const error = new Error("Reservation not edited");
     error.status = 404;
     throw error;
