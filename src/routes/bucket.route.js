@@ -31,8 +31,6 @@ router.post("/upload", upload.any(), async (req, res) => {
 
 // Upload a unique file
 router.post("/uploadOne", upload.any(), async (req, res) => {
-  console.log("body", req.body);
-  console.log("files", req.files);
   try {
     const upload = await saveUploadOne(req.body, req.files[0]);
     res.status(201);

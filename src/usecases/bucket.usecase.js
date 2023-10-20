@@ -37,8 +37,6 @@ const saveUploadOne = async (routeData, picture) => {
   if (!result) throw createError(404, "File not uploaded");
   const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
   result = { ...result, url };
-  console.log("result", result);
-
   return result;
 };
 
