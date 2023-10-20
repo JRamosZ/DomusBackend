@@ -24,6 +24,24 @@ const saveUpload = async (routeData, files) => {
   return uploadedData;
 };
 
+const saveUploadOne = async (routeData, picture) => {
+  const fileName = `${routeData.folder}/${
+    routeData.id
+  }/${new Date().getTime()}-${picture.originalname}`.replaceAll(" ", "");
+  const params = {
+    Bucket: AWS_BUCKET_NAME,
+    Key: fileName,
+    Body: picture.buffer,
+  };
+  let result = await s3Client.send(new PutObjectCommand(params));
+  if (!result) throw createError(404, "File not uploaded");
+  const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+  result = { ...result, url };
+  console.log("result", result);
+
+  return result;
+};
+
 const getPicture = (pictureName) => {
   const params = {
     Bucket: AWS_BUCKET_NAME,
@@ -35,4 +53,4 @@ const getPicture = (pictureName) => {
   return url;
 };
 
-module.exports = { saveUpload, getPicture };
+module.exports = { saveUpload, getPicture, saveUploadOne };
