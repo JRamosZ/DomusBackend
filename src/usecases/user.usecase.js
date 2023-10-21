@@ -57,9 +57,11 @@ const create = async (data) => {
   const saltRounds = 10;
   const { email } = data;
   let user = (await User.findOne({ email })) || null;
-  if (user != null) {
-    console.log("EL USUARIO YA EXISTE");
-  }
+  if (user != null)
+    throw createError(
+      409,
+      "Ya existe una cuenta asociada a este correo, favor de iniciar sesión"
+    );
   data.password = await bcrypt.hash(data.password, saltRounds);
   data.picture = `https://ui-avatars.com/api/?name=${data.nickname}`;
   // user = new User(data);
