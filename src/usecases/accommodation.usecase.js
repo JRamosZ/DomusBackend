@@ -46,9 +46,41 @@ const createAccommodation = (data) => {
   return accommodation;
 };
 
-const createAccommodationId = (data) => {
-  const accommodation = Accommodation.create(data);
-  return accommodation;
+const createAccommodationId = async (ownerId, data, folder, files) => {
+  const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+  // Creating pet and saving ID to owner
+  const accommodation = await Accommodation.create(data);
+  if (!accommodation) throw createError(404, "Accomodation not created");
+  const updatedOwner = await User.findByIdAndUpdate(ownerId, {
+    accommodation: accommodation._id,
+  });
+  if (!updatedOwner) throw createError(404, "Owner not updated");
+
+  // Uploading pictures
+  let uploadedURLs = [];
+  for await (const file of files) {
+    const fileName = `${folder}/${accommodation._id}/${new Date().getTime()}-${
+      file.originalname
+    }`.replaceAll(" ", "");
+    const params = {
+      Bucket: AWS_BUCKET_NAME,
+      Key: fileName,
+      Body: file.buffer,
+    };
+    const result = await s3Client.send(new PutObjectCommand(params));
+    if (!result) throw createError(404, "File not uploaded");
+    const url = `https://${AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+    uploadedURLs.push(url);
+  }
+
+  // Adding URL to accommodation.picture
+  const updatedAccomodation = Accommodation.findByIdAndUpdate(
+    accommodation._id,
+    { picture: uploadedURLs },
+    { returnDocument: "after" }
+  );
+  return updatedAccomodation;
 };
 
 const updateAccommodation = async (id, data, authorization) => {
