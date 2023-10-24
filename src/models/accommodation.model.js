@@ -40,7 +40,7 @@ const accommodationSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    minlength: 10,
+    minlength: 3,
     maxlength: 200,
     required: true,
   },
