@@ -23,14 +23,15 @@ const paymentProcess = async (data) => {
 const paymentStatus = async (event) => {
   switch (event.type) {
     case "payment_intent.succeeded":
-      const paymentIntent = event.data.object;
+      const paymentIntentSucceeded = event.data.object;
       const updatedReservation = await Reservation.findByIdAndUpdate(event.data.object.metadata.reservationId, { status: "paid" }, { returnDocument: "after" });
       const client = await User.findById(event.data.object.metadata.clientId);
       const host = await User.findById(event.data.object.metadata.hostId);
       const emails = await sendEmail(event.data.object.metadata.reservationId);
       break;
-    case "payment_method.attached":
-      const paymentMethod = event.data.object;
+    case 'payment_intent.payment_failed':
+      const paymentIntentPaymentFailed = event.data.object;
+      // email paid failed
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);
