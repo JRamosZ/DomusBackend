@@ -12,6 +12,7 @@ const routerReview = require("./routes/review.route");
 const routerReservation = require("./routes/reservation.route");
 const routerPayment = require("./routes/payment.route");
 const routerBucket = require("./routes/bucket.route");
+const routerMailNotifications = require("./routes/mailNotifications.route");
 
 //Middlewares para toda la api
 app.use(cors());
@@ -31,6 +32,7 @@ app.use("/reservations", routerReservation);
 app.use("/create-payment-intent", routerPayment);
 app.use("/payment", routerPayment);
 app.use("/bucket", routerBucket);
+app.use("/mailNotifications", routerMailNotifications);
 
 //Endpoint de home
 app.get("/", (req, res) => {
