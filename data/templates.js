@@ -86,7 +86,7 @@ const newBookingClient = (data) => {
             <div style="text-align: center">
                 <h2>Hola ${data.client.name}, acabas de realizar una solicitud de reserva a <strong>${data.host.name} ${data.host.lastname}.</strong></h2>
                 <p class="parrafo">
-                Te invitamos a estar atento a tu correo o cuenta en Domus para que te enteres en el momento que tu reserva haya sido aceptada.
+                Te invitamos a estar al pendiente de tu correo o cuenta en Domus para que te enteres en el momento que tu reserva haya sido aceptada.
                 </p>
                 <button><a href="https://www.domus.com.mx/accounts/signin">Ir a mi perfil</a></button>
                 <br>
@@ -646,7 +646,7 @@ const acceptedBookingHost = (data) => {
           <div style="text-align: center">
           <h2>Hola ${data.host.name}, la solicitud de reservación de <strong>${data.client.name} ${data.client.lastname}</strong> acaba de ser aprobada.</h2>
           <p class="parrafo">
-          Te invitamos a estar atento a tu correo o cuenta en Domus para que te enteres en el momento que el pago de la reserva se haya concretado.
+          Te invitamos a estar al pendiente de tu correo o cuenta en Domus para que te enteres en el momento que el pago de la reserva se haya concretado.
           </p>
               <button><a href="https://www.domus.com.mx/accounts/signin">Ir a mi perfil</a></button>
               <br>
