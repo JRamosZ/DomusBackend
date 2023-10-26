@@ -79,16 +79,18 @@ router.post("/", async (req, res) => {
 
 //create accommodation with Id
 router.post("/:id", upload.any(), async (req, res) => {
-  const data = JSON.stringify(req.body.data);
-  console.log("body", req.body);
-  console.log("files", req.files);
-  // const data = JSON.parse(req.body.data);
+  const data = JSON.parse(req.body.data);
   try {
-    // const accommodation = await createAccommodationId(req.params.id, data, req.body.folder, req.files);
+    const accommodation = await createAccommodationId(
+      req.params.id,
+      data,
+      req.body.folder,
+      req.files
+    );
     res.status(201);
     res.json({
       success: true,
-      // data: accommodation,
+      data: accommodation,
     });
   } catch (error) {
     res.status(error.status || 500);

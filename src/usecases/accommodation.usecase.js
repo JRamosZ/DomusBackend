@@ -1,6 +1,8 @@
 const Accommodation = require("../models/accommodation.model");
 const User = require("../models/user.model");
 const jwt = require("../lib/jwt.lib");
+const { s3Client } = require("../lib/s3Client");
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
 
 const createError = require("http-errors");
 
@@ -49,7 +51,7 @@ const createAccommodation = (data) => {
 const createAccommodationId = async (ownerId, data, folder, files) => {
   const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
-  // Creating pet and saving ID to owner
+  // Creating accommodation and saving ID to owner
   const accommodation = await Accommodation.create(data);
   if (!accommodation) throw createError(404, "Accomodation not created");
   const updatedOwner = await User.findByIdAndUpdate(ownerId, {
