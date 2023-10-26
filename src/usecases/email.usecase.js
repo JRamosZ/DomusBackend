@@ -1,8 +1,9 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN } = process.env;
+const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI } = process.env;
 // const htmlTemplete = ;
-
+const REFRESH_TOKEN =
+  "1//04DEJtxTXdGoICgYIARAAGAQSNwF-L9IrWUt8LnWn6VyYipK_9tWHdGrvqCB-EFsMEHNsN8iRfQCk01WrEUz_87uFUJ7OBTJul_U";
 const oAuth2Client = new google.auth.OAuth2(
   CLIENTD_ID,
   CLIENT_SECRET,
@@ -12,6 +13,7 @@ const oAuth2Client = new google.auth.OAuth2(
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const sendEmail = async (user, token) => {
+  
   try {
     const accessToken = await oAuth2Client.getAccessToken();
     const transporter = nodemailer.createTransport({
@@ -25,10 +27,11 @@ const sendEmail = async (user, token) => {
         accessToken: accessToken,
       },
     });
-    await transporter.sendMail({
+    
+    const result = await transporter.sendMail({
       from: "info 🐶😺 <dogcatdomus@gmail.com>",
-      to: `${user.email}`,
-      subject: `Bienvenido a DOMUS, ${user.nickname}`,
+      to: `${user?.email}`,
+      subject: `Bienvenido a DOMUS, ${user?.nickname}`,
       html: `
       <!DOCTYPE html>
       <html lang="en">
@@ -126,35 +129,11 @@ const sendEmail = async (user, token) => {
         cid: "huella",
       },
     });
-  } catch {
-    console.log("Algo salio mal con el EMAIL", error);
+    return result;
+  } catch (error) {
+   
   }
 };
-
-// const getTemplete = (user, token) => {
-//   return `
-// };
+sendEmail();
 
 module.exports = { sendEmail };
-// // async..await is not allowed in global scope, must use a wrapper
-// async function main() {
-//   // send mail with defined transport object
-//   const info = await transporter.sendMail({
-//     from: '"Fred Foo 👻" <foo@example.com>', // sender address
-//     to: "bar@example.com, baz@example.com", // list of receivers
-//     subject: "Hello ✔", // Subject line
-//     text: "Hello world?", // plain text body
-//     html: "<b>Hello world?</b>", // html body
-//   });
-
-//   console.log("Message sent: %s", info.messageId);
-// Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-//
-// NOTE: You can go to https://forwardemail.net/my-account/emails to see your email delivery status and preview
-//       Or you can use the "preview-email" npm package to preview emails locally in browsers and iOS Simulator
-//       <https://github.com/forwardemail/preview-email>
-//
-// }
-
-// main().catch(console.error);
