@@ -6,6 +6,8 @@ const { sendEmail } = require("./mailNotifications.usecase");
 
 const dayjs = require("dayjs");
 dayjs().format();
+var isSameOrAfter = require('dayjs/plugin/isSameOrAfter')
+dayjs.extend(isSameOrAfter)
 var isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 dayjs.extend(isSameOrBefore);
 var isBetween = require("dayjs/plugin/isBetween");
@@ -179,23 +181,38 @@ const uploadEvidence = async (id, data, request) => {
 };
 
 // Reservation status automation (current, concluded)
-cron.schedule("0 5-23 * * *", async () => {
+cron.schedule("0,30 5-23 * * *", async () => {
   const reservations = await Reservation.find({
     $or: [{ status: "paid" }, { status: "current" }],
   });
   const currentDate = dayjs(new Date());
   reservations
-    .filter((item) => item.status === "paid" && currentDate.isAfter(dayjs(item.startDate)))
+    .filter((item) => item.status === "paid" && currentDate.isSameOrAfter(dayjs(item.startDate)))
     .map(async (reservation) => {
       const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, { status: "current" }, { returnDocument: "after" });
       const emails = await sendEmail(reservation.id);
       return updatedReservation;
     });
   reservations
-    .filter((item) => item.status === "current" && currentDate.isAfter(dayjs(item.finishDate)))
+    .filter((item) => item.status === "current" && currentDate.isSameOrAfter(dayjs(item.finishDate)))
     .map(async (reservation) => {
       const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, { status: "concluded" }, { returnDocument: "after" });
       const emails = await sendEmail(reservation.id);
+      return updatedReservation;
+    });
+});
+
+// Cancellation of reservations that didn't proceed
+cron.schedule("0 5,12,18,23 * * *", async () => {
+  const reservations = await Reservation.find({
+    $or: [{ status: "accepted" }, { status: "pending" }],
+  });
+  const currentDate = dayjs(new Date());
+  
+  reservations
+    .filter((item) => currentDate.isSameOrAfter(dayjs(item.startDate)))
+    .map(async (reservation) => {
+      const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, { status: "refused" }, { returnDocument: "after" });
       return updatedReservation;
     });
 });
@@ -207,18 +224,18 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
 
   reservations.map(async (reservation) => {
     reservation.evidence.forEach((item, index) => {
-      intervalConditionals("05:00:00", "11:59:59", item.first.url, "first");
-      intervalConditionals("12:00:00", "17:59:59", item.second.url, "second");
-      intervalConditionals("18:00:00", "22:59:59", item.third.url, "third");
+      intervalConditionals("05:00:00", "11:59:59", item.first.url, "first", item.first.status);
+      intervalConditionals("12:00:00", "17:59:59", item.second.url, "second", item.second.status);
+      intervalConditionals("18:00:00", "22:59:59", item.third.url, "third", item.third.status);
 
-      function intervalConditionals(time1, time2, url, interval) {
+      function intervalConditionals(time1, time2, url, interval, status) {
         if (
           dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") &&
           currentDate.isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`)) &&
           url === ""
         ) {
           reservation["evidence"][index][interval]["status"] = "available";
-        } else if (dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === "") {
+        } else if (dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === "" && status === 'available') {
           reservation["evidence"][index][interval]["status"] = "defaulted";
         }
       }
