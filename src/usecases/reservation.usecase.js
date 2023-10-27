@@ -153,19 +153,19 @@ const uploadEvidence = async (id, data, request) => {
   reservation.evidence.forEach((interval, index) => {
     if (
       currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).format("MMMM D, YYYY") &&
-      currentDate.isBetween(currentDate.format("MMMM D, YYYY 11:00:00"), currentDate.format("MMMM D, YYYY 17:59:59")) &&
+      currentDate.isBetween(currentDate.format("MMMM D, YYYY 23:00:00"), currentDate.format("MMMM D, YYYY 05:59:59")) &&
       interval.first.url === ""
     ) {
       reservation["evidence"][index]["first"] = data;
     } else if (
       currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).format("MMMM D, YYYY") &&
-      currentDate.isBetween(currentDate.format("MMMM D, YYYY 18:00:00"), currentDate.format("MMMM D, YYYY 23:59:59")) &&
+      currentDate.isBetween(currentDate.format("MMMM D, YYYY 06:00:00"), currentDate.format("MMMM D, YYYY 11:59:59")) &&
       interval.second.url === ""
     ) {
       reservation["evidence"][index]["second"] = data;
     } else if (
       currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).format("MMMM D, YYYY") &&
-      currentDate.isBetween(currentDate.format("MMMM D, YYYY 00:00:00"), currentDate.format("MMMM D, YYYY 04:59:59")) &&
+      currentDate.isBetween(currentDate.format("MMMM D, YYYY 12:00:00"), currentDate.format("MMMM D, YYYY 16:59:59")) &&
       interval.third.url === ""
     ) {
       reservation["evidence"][index]["third"] = data;
@@ -224,9 +224,9 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
 
   reservations.map(async (reservation) => {
     reservation.evidence.forEach((item, index) => {
-      intervalConditionals("11:00:00", "17:59:59", item.first.url, "first", item.first.status);
-      intervalConditionals("18:00:00", "23:59:59", item.second.url, "second", item.second.status);
-      intervalConditionals("0:00:00", "04:59:59", item.third.url, "third", item.third.status);
+      intervalConditionals("23:00:00", "05:59:59", item.first.url, "first", item.first.status);
+      intervalConditionals("06:00:00", "11:59:59", item.second.url, "second", item.second.status);
+      intervalConditionals("12:00:00", "16:59:59", item.third.url, "third", item.third.status);
 
       function intervalConditionals(time1, time2, url, interval, status) {
         if (
