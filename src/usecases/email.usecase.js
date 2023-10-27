@@ -1,19 +1,15 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI } = process.env;
+
+const BASE_URL = process.env.BASE_URL;
 // const htmlTemplete = ;
-const REFRESH_TOKEN =
-  "1//04DEJtxTXdGoICgYIARAAGAQSNwF-L9IrWUt8LnWn6VyYipK_9tWHdGrvqCB-EFsMEHNsN8iRfQCk01WrEUz_87uFUJ7OBTJul_U";
-const oAuth2Client = new google.auth.OAuth2(
-  CLIENTD_ID,
-  CLIENT_SECRET,
-  REDIRECT_URI
-);
+const REFRESH_TOKEN = "1//04DEJtxTXdGoICgYIARAAGAQSNwF-L9IrWUt8LnWn6VyYipK_9tWHdGrvqCB-EFsMEHNsN8iRfQCk01WrEUz_87uFUJ7OBTJul_U";
+const oAuth2Client = new google.auth.OAuth2(CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI);
 
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const sendEmail = async (user, token) => {
-  
   try {
     const accessToken = await oAuth2Client.getAccessToken();
     const transporter = nodemailer.createTransport({
@@ -27,7 +23,7 @@ const sendEmail = async (user, token) => {
         accessToken: accessToken,
       },
     });
-    
+
     const result = await transporter.sendMail({
       from: "info 🐶😺 <dogcatdomus@gmail.com>",
       to: `${user?.email}`,
@@ -104,14 +100,14 @@ const sendEmail = async (user, token) => {
             <h2>Hola ${user.nickname} Gracias por unirte a <strong>DOMUS</strong></h2>
               <p class="parrafo">
                 Estamos muy
-                contentos de que estes con nosotros. verifica tu correo en el
+                contentos de que estés con nosotros. Verifica tu correo en el
                 siguiente enlace.
               </p>
-              <a href="http://localhost:8080/users/confirm/${token}">${token}</a>
+              <a href="${BASE_URL}/users/confirm/${token}">${token}</a>
              
               <p class="parrafo">
                 Busca cuidadores y contáctalos por la plataforma de una forma segura.
-                Recibirás actualizaciones diarias de tu mascota. ¿Suena bien no?. No
+                Recibirás actualizaciones diarias de tu mascota, ¿suena bien no? No
                 esperes más y encuentra al cuidador ideal para tu mascota.
               </p>
             </div>
@@ -130,9 +126,7 @@ const sendEmail = async (user, token) => {
       },
     });
     return result;
-  } catch (error) {
-   
-  }
+  } catch (error) {}
 };
 sendEmail();
 
