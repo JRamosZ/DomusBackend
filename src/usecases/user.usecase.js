@@ -6,8 +6,8 @@ const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const { s3Client } = require("../lib/s3Client");
 const { sendEmail } = require("./email.usecase");
 
-const BASE_URL = process.env.BASE_URL;
-
+const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL;
+console.log("URL ", NEXT_PUBLIC_URL);
 const list = (filter) => {
   const userList = User.find(filter);
   return userList;
@@ -29,7 +29,15 @@ const getById = async (id) => {
       },
       {
         path: "reservations",
-        select: ["_id", "host", "client", "startDate", "finishDate", "status", "cost"],
+        select: [
+          "_id",
+          "host",
+          "client",
+          "startDate",
+          "finishDate",
+          "status",
+          "cost",
+        ],
         populate: [
           {
             path: "host",
@@ -51,7 +59,11 @@ const create = async (data) => {
   const saltRounds = 10;
   const { email } = data;
   let user = (await User.findOne({ email })) || null;
-  if (user != null) throw createError(409, "Ya existe una cuenta asociada a este correo, favor de iniciar sesión con ella o regístrate con un nuevo correo");
+  if (user != null)
+    throw createError(
+      409,
+      "Ya existe una cuenta asociada a este correo, favor de iniciar sesión con ella o regístrate con un nuevo correo"
+    );
   data.password = await bcrypt.hash(data.password, saltRounds);
   data.picture = `https://ui-avatars.com/api/?name=${data.nickname}`;
   user = new User(data);
@@ -101,16 +113,21 @@ const confirm = async (req, res) => {
   user.isMailValidated = true;
   await user.save();
 
-  // Redireccionar al a cofirmacion
-  return res.redirect(`${BASE_URL}/accounts/signin`);
+  // Redireccionar ala cofirmacion
+  return res.redirect(`${NEXT_PUBLIC_URL}/accounts/signin`);
 };
 
 const login = async (email, password) => {
   const user = await User.findOne({ email });
   if (!user) throw createError(400, "Usuario o Contraseña incorrectos");
   const passwordIsValid = await bcrypt.compare(password, user.password);
-  if (!passwordIsValid) throw createError(400, "Usuario o Contraseña incorrectos");
-  if (!user.isMailValidated) throw createError(400, "Tu correo aún no ha sido validado, revisa tu bandeja de entrada");
+  if (!passwordIsValid)
+    throw createError(400, "Usuario o Contraseña incorrectos");
+  if (!user.isMailValidated)
+    throw createError(
+      400,
+      "Tu correo aún no ha sido validado, revisa tu bandeja de entrada"
+    );
 
   const token = jwt.sign({
     id: user._id,
@@ -126,7 +143,9 @@ const update = async (id, data, folderName, fileData) => {
   data.birthday = new Date(data.birthday);
 
   // Uploading picture
-  const fileName = `${folderName}/${id}/${new Date().getTime()}-${fileData.originalname}`.replaceAll(" ", "");
+  const fileName = `${folderName}/${id}/${new Date().getTime()}-${
+    fileData.originalname
+  }`.replaceAll(" ", "");
   const params = {
     Bucket: AWS_BUCKET_NAME,
     Key: fileName,

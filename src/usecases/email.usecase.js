@@ -4,8 +4,13 @@ const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI } = process.env;
 
 const BASE_URL = process.env.BASE_URL;
 // const htmlTemplete = ;
-const REFRESH_TOKEN = "1//04DEJtxTXdGoICgYIARAAGAQSNwF-L9IrWUt8LnWn6VyYipK_9tWHdGrvqCB-EFsMEHNsN8iRfQCk01WrEUz_87uFUJ7OBTJul_U";
-const oAuth2Client = new google.auth.OAuth2(CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI);
+const REFRESH_TOKEN =
+  "1//04DEJtxTXdGoICgYIARAAGAQSNwF-L9IrWUt8LnWn6VyYipK_9tWHdGrvqCB-EFsMEHNsN8iRfQCk01WrEUz_87uFUJ7OBTJul_U";
+const oAuth2Client = new google.auth.OAuth2(
+  CLIENTD_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
 
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
@@ -25,7 +30,7 @@ const sendEmail = async (user, token) => {
     });
 
     const result = await transporter.sendMail({
-      from: "info 🐶😺 <dogcatdomus@gmail.com>",
+      from: "info 🐶😺 <domus@gmail.com>",
       to: `${user?.email}`,
       subject: `Bienvenido a DOMUS, ${user?.nickname}`,
       html: `
