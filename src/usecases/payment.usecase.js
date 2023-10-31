@@ -5,7 +5,7 @@ const { sendEmail } = require("./mailNotifications.usecase");
 
 const paymentProcess = async (data) => {
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: data.amount * 100,
+    amount: Math.round(data.amount * 100),
     currency: "mxn",
     payment_method_types: ["card"],
     description: data.description,

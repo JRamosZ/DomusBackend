@@ -108,7 +108,7 @@ const reservationSchema = new mongoose.Schema({
   ],
   created: {
     type: Date,
-    default: new Date(Date.now() - 60 * 60 * 1000),
+    default: new Date()
   },
 });
 
