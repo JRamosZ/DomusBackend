@@ -102,7 +102,7 @@ const confirm = async (req, res) => {
   await user.save();
 
   // Redireccionar al a cofirmacion
-  return res.redirect(`${BASE_URL}/accounts/signin`);
+  return res.redirect(`http://www.domus.com.mx/accounts/signin`);
 };
 
 const login = async (email, password) => {
