@@ -8,8 +8,9 @@ const dayjs = require("dayjs");
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 const timezone = require('dayjs/plugin/timezone');
-const timeZoneMx = 'America/Mexico_City';
 dayjs.extend(timezone);
+// const timeZoneMx = 'America/Mexico_City';
+//dayjs.tz.setDefault("America/Mexico_City")
 dayjs().format();
 var isSameOrAfter = require('dayjs/plugin/isSameOrAfter')
 dayjs.extend(isSameOrAfter)
@@ -154,22 +155,22 @@ const uploadEvidence = async (id, data, request) => {
     error.status = 403;
     throw error;
   }
-  const currentDate = dayjs(data.time).tz(timeZoneMx);
+  const currentDate = dayjs(data.time);
   reservation.evidence.forEach((interval, index) => {
     if (
-      currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).tz(timeZoneMx).format("MMMM D, YYYY") &&
+      currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).format("MMMM D, YYYY") &&
       currentDate.isBetween(currentDate.format("MMMM D, YYYY 05:00:00"), currentDate.format("MMMM D, YYYY 11:59:59")) &&
       interval.first.url === ""
     ) {
       reservation["evidence"][index]["first"] = data;
     } else if (
-      currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).tz(timeZoneMx).format("MMMM D, YYYY") &&
+      currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).format("MMMM D, YYYY") &&
       currentDate.isBetween(currentDate.format("MMMM D, YYYY 12:00:00"), currentDate.format("MMMM D, YYYY 17:59:59")) &&
       interval.second.url === ""
     ) {
       reservation["evidence"][index]["second"] = data;
     } else if (
-      currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).tz(timeZoneMx).format("MMMM D, YYYY") &&
+      currentDate.format("MMMM D, YYYY") === dayjs(interval.intervalDate).format("MMMM D, YYYY") &&
       currentDate.isBetween(currentDate.format("MMMM D, YYYY 18:00:00"), currentDate.format("MMMM D, YYYY 22:59:59")) &&
       interval.third.url === ""
     ) {
@@ -190,16 +191,16 @@ cron.schedule("0,30 5-23 * * *", async () => {
   const reservations = await Reservation.find({
     $or: [{ status: "paid" }, { status: "current" }],
   });
-  const currentDate = dayjs(new Date()).tz(timeZoneMx);
+  const currentDate = dayjs(new Date())
   reservations
-    .filter((item) => item.status === "paid" && currentDate.isSameOrAfter(dayjs(item.startDate).tz(timeZoneMx)))
+    .filter((item) => item.status === "paid" && currentDate.isSameOrAfter(dayjs(item.startDate)))
     .map(async (reservation) => {
       const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, { status: "current" }, { returnDocument: "after" });
       const emails = await sendEmail(reservation.id);
       return updatedReservation;
     });
   reservations
-    .filter((item) => item.status === "current" && currentDate.isSameOrAfter(dayjs(item.finishDate).tz(timeZoneMx)))
+    .filter((item) => item.status === "current" && currentDate.isSameOrAfter(dayjs(item.finishDate)))
     .map(async (reservation) => {
       const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, { status: "concluded" }, { returnDocument: "after" });
       const emails = await sendEmail(reservation.id);
@@ -212,10 +213,10 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
   const reservations = await Reservation.find({
     $or: [{ status: "accepted" }, { status: "pending" }],
   });
-  const currentDate = dayjs(new Date()).tz(timeZoneMx);
+  const currentDate = dayjs(new Date())
   
   reservations
-    .filter((item) => currentDate.isSameOrAfter(dayjs(item.startDate).tz(timeZoneMx)))
+    .filter((item) => currentDate.isSameOrAfter(dayjs(item.startDate)))
     .map(async (reservation) => {
       const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, { status: "refused" }, { returnDocument: "after" });
       return updatedReservation;
@@ -225,7 +226,7 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
 // Intervals evidence status automation (available, defaulted)
 cron.schedule("0 5,12,18,23 * * *", async () => {
   const reservations = await Reservation.find({ status: "current" });
-  const currentDate = dayjs(new Date()).tz(timeZoneMx);
+  const currentDate = dayjs(new Date())
 
   reservations.map(async (reservation) => {
     reservation.evidence.forEach((item, index) => {
@@ -235,26 +236,27 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
 
       function intervalConditionals(time1, time2, url, interval, status) {
         if (
-          dayjs(item.intervalDate).tz(timeZoneMx).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") &&
+          dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") &&
           currentDate.isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`)) &&
-          url === ""
+          url === "" && 
+          !dayjs(reservation.finishDate).isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`))
         ) {
           reservation["evidence"][index][interval]["status"] = "available";
-        } else if (dayjs(item.intervalDate).tz(timeZoneMx).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === "" && status === 'available') {
+        } else if (dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === "" && status === 'available') {
           reservation["evidence"][index][interval]["status"] = "defaulted";
         }
       }
+      
     });
     const updatedReservation = await Reservation.findByIdAndUpdate(reservation.id, { evidence: reservation.evidence }, { returnDocument: "after" });
     return updatedReservation;
   });
-});
+})
+// ,{
+//   scheduled: true,
+//   timezone: "America/Mexico_City"
+// });
 
-cron.schedule("*/30 * * * * *", async () => {
-  const currentDate = dayjs(new Date()).tz(timeZoneMx);
-  console.log(dayjs(currentDate))
-  console.log(dayjs(currentDate).format("MMMM D, YYYY 17:59:59"))
-});
 
 module.exports = {
   create,
