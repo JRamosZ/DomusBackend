@@ -54,11 +54,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
     validate: {
       validator: function (v) {
-        return (
-          v &&
-          v.getTime() < Date.now() - 18 * 365 * 24 * 60 * 60 * 1000 &&
-          v.getTime() > Date.now() - 100 * 365 * 24 * 60 * 60 * 1000
-        );
+        return v && v.getTime() < Date.now() - 18 * 365 * 24 * 60 * 60 * 1000 && v.getTime() > Date.now() - 100 * 365 * 24 * 60 * 60 * 1000;
       },
       message: "La edad debe estar entre 18 y 100 años",
     },
@@ -101,7 +97,7 @@ const userSchema = new mongoose.Schema({
   },
   joined: {
     type: Date,
-    default: new Date(Date.now() - 6 * 60 * 60 * 1000),
+    default: new Date(),
   },
   accommodation: {
     type: mongoose.Schema.Types.ObjectId,
