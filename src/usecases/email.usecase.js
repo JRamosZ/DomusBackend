@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI } = process.env;
+const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN } = process.env;
 
 const BASE_URL = process.env.BASE_URL;
 // const htmlTemplete = ;

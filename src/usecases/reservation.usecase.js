@@ -5,9 +5,15 @@ const jwt = require("../lib/jwt.lib");
 const { sendEmail } = require("./mailNotifications.usecase");
 
 const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+dayjs.extend(utc);
+const timezone = require("dayjs/plugin/timezone");
+dayjs.extend(timezone);
+// const timeZoneMx = 'America/Mexico_City';
+//dayjs.tz.setDefault("America/Mexico_City")
 dayjs().format();
-var isSameOrAfter = require('dayjs/plugin/isSameOrAfter')
-dayjs.extend(isSameOrAfter)
+var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
+dayjs.extend(isSameOrAfter);
 var isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 dayjs.extend(isSameOrBefore);
 var isBetween = require("dayjs/plugin/isBetween");
@@ -25,7 +31,7 @@ const create = async (data) => {
   data["evidence"] = [];
   let initialDate = dayjs(data["startDate"]);
   let finalDate = dayjs(data["finishDate"]);
-  while (initialDate.isSameOrBefore(finalDate)) {
+  while (initialDate.isSameOrBefore(finalDate, "day")) {
     data["evidence"].push({
       intervalDate: initialDate,
       first: { url: "", time: null, status: "pending" },
@@ -208,7 +214,7 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
     $or: [{ status: "accepted" }, { status: "pending" }],
   });
   const currentDate = dayjs(new Date());
-  
+
   reservations
     .filter((item) => currentDate.isSameOrAfter(dayjs(item.startDate)))
     .map(async (reservation) => {
@@ -232,10 +238,16 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
         if (
           dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") &&
           currentDate.isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`)) &&
-          url === ""
+          url === "" &&
+          !dayjs(reservation.finishDate).isBetween(currentDate.format(`MMMM D, YYYY ${time1}`), currentDate.format(`MMMM D, YYYY ${time2}`))
         ) {
           reservation["evidence"][index][interval]["status"] = "available";
-        } else if (dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") && currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) && url === "" && status === 'available') {
+        } else if (
+          dayjs(item.intervalDate).format("MMMM D, YYYY") === currentDate.format("MMMM D, YYYY") &&
+          currentDate.isAfter(currentDate.format(`MMMM D, YYYY ${time2}`)) &&
+          url === "" &&
+          status === "available"
+        ) {
           reservation["evidence"][index][interval]["status"] = "defaulted";
         }
       }
@@ -244,6 +256,10 @@ cron.schedule("0 5,12,18,23 * * *", async () => {
     return updatedReservation;
   });
 });
+// ,{
+//   scheduled: true,
+//   timezone: "America/Mexico_City"
+// });
 
 module.exports = {
   create,
