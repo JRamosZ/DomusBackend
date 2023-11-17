@@ -1,11 +1,14 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI } = process.env;
+const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN } = process.env;
 
 const BASE_URL = process.env.BASE_URL;
-// const htmlTemplete = ;
-const REFRESH_TOKEN = "1//04KYdx5LYmZvICgYIARAAGAQSNwF-L9IrDqyUPoZiVUP9IPNcETy1KMLgqsRoD4LU1xM2rppXan9j5PgulRCuhNYPtQv32lyc6Uw";
-const oAuth2Client = new google.auth.OAuth2(CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI);
+
+const oAuth2Client = new google.auth.OAuth2(
+  CLIENTD_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
 
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
@@ -25,7 +28,7 @@ const sendEmail = async (user, token) => {
     });
 
     const result = await transporter.sendMail({
-      from: "info 🐶😺 <dogcatdomus@gmail.com>",
+      from: "info 🐶😺 <domus@gmail.com>",
       to: `${user?.email}`,
       subject: `Bienvenido a DOMUS, ${user?.nickname}`,
       html: `
