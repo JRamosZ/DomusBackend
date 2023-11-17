@@ -3,9 +3,7 @@ const { google } = require("googleapis");
 const { CLIENTD_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN } = process.env;
 
 const BASE_URL = process.env.BASE_URL;
-// const htmlTemplete = ;
-const REFRESH_TOKEN =
-  "1//04DEJtxTXdGoICgYIARAAGAQSNwF-L9IrWUt8LnWn6VyYipK_9tWHdGrvqCB-EFsMEHNsN8iRfQCk01WrEUz_87uFUJ7OBTJul_U";
+
 const oAuth2Client = new google.auth.OAuth2(
   CLIENTD_ID,
   CLIENT_SECRET,
